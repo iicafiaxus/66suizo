@@ -1,9 +1,10 @@
 const Cell = function(props){
 	return <div
-		className="cell"
+		className={"cell" + (props.canAccept ? " accepting" : "")}
 		style={{
-			gridRow: (props.x + 1),
-			gridColumn: (props.y + 1),
+			gridRow: (props.cell.x + 1),
+			gridColumn: (props.cell.y + 1),
 		}}
+		onClick={() => props.onClick(props.cell)}
 	>{props.children}</div>
 }
