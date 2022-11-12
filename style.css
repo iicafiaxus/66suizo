@@ -1,1 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600');
 * { font-family: "Arial", sans-serif }
+
+h1 { text-align: center; letter-spacing: 0.1em; }
+
+.board {
+	display: grid; width: 600px; height: 700px;
+	border: 3px solid;
+	margin: 4px auto; 
+	background: #eed;
+}
+
+.cell {
+	border: 1px solid #340;
+	margin: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.piece{
+	padding: 12px 15px 16px;
+	letter-spacing: -2px; 
+	border-radius: 40px;
+	writing-mode: vertical-lr;
+	font-family: "Klee One"; font-weight: 600; 
+	font-size: 32px; 
+	text-align: center;
+}
+
+.piece.size1 {
+	padding: 8px 15px 12px;
+	font-size: 30px;
+}
+.piece.size2 {
+	padding: 10px 15px 14px;
+	font-size: 32px;
+}
+.piece.size3 {
+	padding: 12px 15px 16px;
+	font-size: 32px;
+}
+.piece.size4 {
+	padding: 12px 15px 16px;
+	font-size: 34px;
+}
+
+
+.piece.player0 {
+	/*background-image: url('images/828318-blue.png');*/
+	/*clip-path: polygon(50% 0%, 90% 10%, 100% 100%, 0% 100%, 10% 10%);*/
+	background: #09c6;
+	box-shadow: #8884 0px 3px 2px 2px;
+}
+
+.piece.player1 {
+	/*background-image: url('images/828318-yellow.png');*/
+	transform: rotate(180deg);
+	background: #dc06;
+	box-shadow: #8884 -0px -3px 2px 2px;
+}
