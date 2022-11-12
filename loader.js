@@ -31,7 +31,9 @@ Loader.addLoad = function(){
 Loader.removeLoad = function(){
 	this.loadCount -= 1;
 	if(this.loadCount == 0 && this.waitCount > 0){
-		throw new Exception("Loop found");
+		let waiterNames = [];
+		for(let name in this.items) if(this.items[name].isWaiting) waiterNames.push(name);
+		throw new Error("Loader: (" + waiterNames.join(", ") + ") Loop Found");
 	}
 }
 Loader.removeWait = function(){
@@ -64,13 +66,16 @@ let LoaderItem = function(name){
 }
 
 LoaderItem.prototype.load = async function(){
-	if(this.isLoading) throw new Exception("Loader item already loading");
-	if(this.isLoaded) throw new Exception("Loader item already loaded");
+	if(this.isLoading) throw new Error("Loader: (" + this.name + ") Already Loading");
+	if(this.isLoaded) throw new Error("Loader: (" + this.name + ") Already Loaded");
 	this.isLoading = true;
 	Loader.addLoad();
 	console.log("Loader: loading " + this.name);
 	fetch(this.name)
-		.then((response) => (response.text()))
+		.then((response) => {
+			if(response.ok) return response.text();
+			else throw new Error("Loader: (" + this.name + ") " + response.statusText);
+			})
 		.then((text) => {
 			this.isLoading = false;
 			this.isLoaded = true;
@@ -96,17 +101,17 @@ LoaderItem.prototype.parse = function(text){
 }
 
 LoaderItem.prototype.addCallee = function(callee){
-	if(this.isWaiting) throw new Exception("Caller already waiting");
+	if(this.isWaiting) throw new Error("Loader: (" + this.name + ") Caller Already Waiting");
 	if(this.callees.includes(callee)) return;
-	if(callee.isLoaded) return;
+	if(callee.isDone) return;
 	this.callees.push(callee);
 	this.waitCount += 1;
 	callee.callers.push(this);
 }
 
 LoaderItem.prototype.perform = function(){
-	if( ! this.isLoaded) throw new Exception("Caller not yet loaded");
-	if(this.isWaiting) throw new Exception("Caller still waiting");
+	if( ! this.isLoaded) throw new Error("Loader: (" + this.name + ") Caller Not Yet Loaded");
+	if(this.isWaiting) throw new Error("Loader: (" + this.name + ") Caller Still Waiting");
 
 	let transformed = Babel.transform(this.source, { "presets": ["react"] }).code;
 	let script = document.createElement("script");
@@ -122,6 +127,7 @@ LoaderItem.prototype.perform = function(){
 
 LoaderItem.prototype.removeWait = function(){
 	this.waitCount -= 1;
+	console.log("Loader: " + this.name + " : waiting for " + this.waitCount);
 	if(this.waitCount == 0){
 		this.isWaiting = false;
 		this.perform();
