@@ -1,4 +1,4 @@
-let Cell = function(props){
+const Cell = function(props){
 	return <div
 		className="cell"
 		style={{

@@ -2,12 +2,12 @@
 "REQUIRE piece.jsx";
 "REQUIRE board.jsx";
 
-let Game = function(props){
-	let cells = [];
+const Game = function(props){
+	const cells = [];
 	for(let x = 0; x < 6; x ++) for(let y = 0; y < 6; y ++){
 		cells.push({ x, y });
 	}
-	let pieces = [
+	const pieces = [
 		{ x: 0, y: 0, name: "銀将", size: 2, player: 1 },
 		{ x: 0, y: 1, name: "飛車", size: 3, player: 1 },
 		{ x: 0, y: 2, name: "酔象", size: 4, player: 1 },

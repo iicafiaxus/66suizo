@@ -1,7 +1,7 @@
 "REQUIRE cell.jsx"
 "REQUIRE piece.jsx"
 
-let Board = function(props){
+const Board = function(props){
 	return <div className="board" style={{
 		gridTemplateColumns: "repeat(" + props.xSize + ", 1fr)",
 		gridTemplateRows: "repeat(" + props.ySize + ", 1fr)",
