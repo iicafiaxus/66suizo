@@ -89,7 +89,7 @@ LoaderItem.prototype.load = async function(){
 LoaderItem.prototype.parse = function(text){
 	let lines = text.split("\n");
 	for(let line of lines){
-		let match = line.match(/^"REQUIRE (.*)"$/);
+		let match = line.match(/^"REQUIRE (.*)";?$/);
 		if(match && match[1]){
 			let calleeName = match[1];
 			let callee = Loader.getItem(calleeName);
