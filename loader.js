@@ -84,7 +84,6 @@ LoaderItem.prototype.load = async function(){
 			else this.isWaiting = true;
 			Loader.removeLoad();
 		});
-		//TODO: error handling
 }
 
 LoaderItem.prototype.parse = function(text){
