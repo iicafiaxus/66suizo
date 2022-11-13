@@ -10,10 +10,6 @@ const Board = function(props){
 		if(floating) return;
 		setFloating(piece);
 	}
-	const handlePieceDoubleClick = (piece) => {
-		props.promote(piece);
-		setFloating(null);
-	}
 
 	const handleCellClick = (cell) => {
 		if( ! floating) return;
@@ -60,7 +56,6 @@ const Board = function(props){
 			isPickable={! floating}
 			isFloating={floating == p}
 			onClick={handlePieceClick}
-			onDoubleClick={handlePieceDoubleClick}
 		/>
 	);
 

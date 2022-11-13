@@ -9,7 +9,6 @@ const Piece = function(props){
 			(props.isPickable ? " pickable" : "")
 		].join(" ")}
 		onClick={() => props.onClick(props.piece)}
-		onDoubleClick={() => props.onDoubleClick(props.piece)}
 	>
 		{props.piece.entity.names[props.position.face]}
 	</div>
