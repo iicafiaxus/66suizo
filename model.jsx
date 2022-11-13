@@ -1,12 +1,12 @@
 const Model = {};
 
 Model.pieceEntities = {
-	king: { names: ["王将", "　"], size: 4 },
+	king: { names: ["王将", "　"], size: 4, isSingleFaced: true },
 	queen: { names: ["酔象", "太子"], size: 4 },
 	rook: { names: ["飛車", "龍王"], size: 3 },
 	bishop: { names: ["角行", "龍馬"], size: 3 },
 	silver: { names: ["銀将", "金"], size: 2 },
-	pawn: { names: ["歩兵", "と"], size: 1 },
+	pawn: { names: ["歩兵", "と"], size: 1, forcePromotion: 1 },
 };
 
 Model.pieceEntities.king.lines = [[
@@ -16,14 +16,14 @@ Model.pieceEntities.king.lines = [[
 ]];
 Model.pieceEntities.queen.lines = [[
 	[{dx: -1, dy: -1}], [{dx: -1, dy: 0}], [{dx: -1, dy: 1}], [{dx: 0, dy: -1}],
-	[{dx: 0, dy: 1}], [{dx: 1, dy: -1}], [{dx: 0, dy: 1}],
+	[{dx: 0, dy: 1}], [{dx: 1, dy: -1}], [{dx: 1, dy: 1}],
 ],[
 	[{dx: -1, dy: -1}], [{dx: -1, dy: 0}], [{dx: -1, dy: 1}], [{dx: 0, dy: -1}],
-	[{dx: 0, dy: 1}], [{dx: 1, dy: -1}], [{dx: 1, dy: 0}], [{dx: 0, dy: 1}],
+	[{dx: 0, dy: 1}], [{dx: 1, dy: -1}], [{dx: 1, dy: 0}], [{dx: 1, dy: 1}],
 ]];
 Model.pieceEntities.silver.lines = [[
 	[{dx: -1, dy: -1}], [{dx: -1, dy: 0}], [{dx: -1, dy: 1}],
-	[{dx: 1, dy: -1}], [{dx: 0, dy: 1}],
+	[{dx: 1, dy: -1}], [{dx: 1, dy: 1}],
 ],[
 	[{dx: -1, dy: -1}], [{dx: -1, dy: 0}], [{dx: -1, dy: 1}], [{dx: 0, dy: -1}],
 	[{dx: 0, dy: 1}], [{dx: 1, dy: 0}],
@@ -44,7 +44,7 @@ Model.pieceEntities.rook.lines = [[
 	[{dx: 0, dy: -1}, {dx: 0, dy: -2}, {dx: 0, dy: -3}, {dx: 0, dy: -4}, {dx: 0, dy: -5}],
 	[{dx: 0, dy: 1}, {dx: 0, dy: 2}, {dx: 0, dy: 3}, {dx: 0, dy: 4}, {dx: 0, dy: 5}],
 	[{dx: 1, dy: 0}, {dx: 2, dy: 0}, {dx: 3, dy: 0}, {dx: 4, dy: 0}, {dx: 5, dy: 0}],
-	[{dx: -1, dy: -1}], [{dx: -1, dy: 1}], [{dx: 1, dy: -1}], [{dx: 0, dy: 1}],
+	[{dx: -1, dy: -1}], [{dx: -1, dy: 1}], [{dx: 1, dy: -1}], [{dx: 1, dy: 1}],
 ]];
 Model.pieceEntities.bishop.lines = [[
 	[{dx: -1, dy: -1}, {dx: -2, dy: -2}, {dx: -3, dy: -3}, {dx: -4, dy: -4}, {dx: -5, dy: -5}],

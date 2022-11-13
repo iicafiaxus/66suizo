@@ -1,8 +1,10 @@
-"REQUIRE cell.jsx"
-"REQUIRE piece.jsx"
+"REQUIRE cell.jsx";
+"REQUIRE piece.jsx";
+"REQUIRE modal.jsx";
 
 const Board = function(props){
 	const [floating, setFloating] = React.useState(null);
+	const [isWaitingPromotion, setIsWaitingPromotion] = React.useState(false);
 
 	const handlePieceClick = (piece) => {
 		if(floating) return;
@@ -19,8 +21,17 @@ const Board = function(props){
 			setFloating(null);
 			return;
 		}
-		else props.move(floating, cell);
-		setFloating(null);
+		else{
+			const promo = props.checkPromotion(floating, cell);
+			if(promo[0] && promo[1]){
+				props.move(floating, cell, promo[0] ? 0 : 1);
+				setIsWaitingPromotion(true);
+			}
+			else{
+				props.move(floating, cell, promo[0] ? 0 : 1);
+				setFloating(null);
+			}
+		}
 	}
 	const handleKomadaiClick = (cell) => {
 		if( ! floating) return;
@@ -33,6 +44,12 @@ const Board = function(props){
 	const getKomadaiPieces = (player) => props.pieces.filter(p => 
 		props.positions[p.id].isOut && props.positions[p.id].player == player
 	);
+
+	const endWaitingPromotion = (yes) => {
+		if(yes) props.promote(floating);
+		setIsWaitingPromotion(false);
+		setFloating(null);
+	}
 
 	// TODO: context
 	const renderPieces = (pieces) => pieces.map((p, i) => 
@@ -82,6 +99,10 @@ const Board = function(props){
 					{renderPieces(getKomadaiPieces(0))}
 				</Cell>
 			</div>
+			{isWaitingPromotion && <Modal onClose={() => endWaitingPromotion(false)}>
+				<button onClick={() => endWaitingPromotion(true)}>成る</button>
+				<button onClick={() => endWaitingPromotion(false)}>成らない</button>
+			</Modal>}
 		</React.Fragment>
 	)
 };

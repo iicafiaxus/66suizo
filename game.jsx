@@ -19,7 +19,10 @@ const Game = function(props){
 		if(positions.find(pos =>
 			pos.x == cell.x && pos.y == cell.y && pos.player == positions[piece.id].player
 		)) return false;
-		if(positions[piece.id].isOut) return true; // TODO: 行きどころのない駒、二歩
+		if(positions[piece.id].isOut){
+			if(positions.find(pos => pos.x == cell.x && pos.y == cell.y)) return false;
+			else return true; // TODO: 行きどころのない駒、二歩
+		}
 		for(let line of piece.entity.lines[positions[piece.id].face]){
 			for(let t of line){
 				const x1 = positions[piece.id].x + t.dx * [1, -1][positions[piece.id].player];
@@ -31,8 +34,20 @@ const Game = function(props){
 		}
 		return false;
 	}
+	const checkPromotion = (piece, cell) => {
+		// returns [a, b]; a: can keep raw, b: can promote
+		const player = positions[piece.id].player;
+		if(positions[piece.id].face == 1) return [false, true];
+		if(piece.entity.isSingleFaced) return [true, false];
+		if(positions[piece.id].isOut) return [true, false];
+		if(player == 0 && cell.x > 1 && positions[piece.id].x > 1) return [true, false];
+		if(player == 1 && cell.x < 4 && positions[piece.id].x < 4) return [true, false];
+		if(player == 0 && cell.x < piece.entity.forcePromotion) return [false, true];
+		if(player == 1 && cell.x > 5 - piece.entity.forcePromotion) return [false, true];
+		return [true, true];
+	}
 
-	const move = (piece, cell) => {
+	const move = (piece, cell, face) => {
 		for(let p of Model.pieces.filter(p =>
 			positions[p.id].x == cell.x && positions[p.id].y == cell.y
 		)) moveToKomadai(p, positions[piece.id].player);
@@ -40,6 +55,7 @@ const Game = function(props){
 			...pos,
 			x: cell.x,
 			y: cell.y,
+			face: face,
 			isOut: false,
 			isFloating: false
 		}));
@@ -72,6 +88,7 @@ const Game = function(props){
 				pieces={Model.pieces}
 				positions={Model.pieces.map(p => positions[p.id])}
 				checkCanMove={checkCanMove}
+				checkPromotion={checkPromotion}
 				move={move}
 				moveToKomadai={moveToKomadai}
 				promote={promote}
