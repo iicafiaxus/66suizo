@@ -9,6 +9,10 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	margin: 4px auto; 
 	background: #eed;
 }
+.board.komadai{
+	width: 580px; height: 200px;
+}
+
 
 .cell {
 	border: 1px solid #340;
@@ -20,9 +24,18 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .cell.accepting {
 	cursor: pointer;
 }
+.cell.accepting:hover {
+	outline: 2px dashed #970d;
+	outline-offset: -8px;
+}
+.board.komadai .cell{
+	display: flex;
+	flex-wrap: wrap;
+}
 
 .piece{
 	padding: 12px 15px 16px;
+	height: 2em; 
 	letter-spacing: -2px; 
 	border-radius: 40px;
 	writing-mode: vertical-lr;
@@ -36,7 +49,15 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 
 .piece.floating{
-	outline: 2px dashed red;
+	outline: 2px dashed #970d;
+	outline-offset: 4px;
+}
+
+.piece.face0{
+	color: #000f;
+}
+.piece.face1{
+	color: #a00f;
 }
 
 .piece.size1 {

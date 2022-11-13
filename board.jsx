@@ -2,48 +2,142 @@
 "REQUIRE piece.jsx"
 
 const Board = function(props){
-	const [floatingPiece, setFloatingPiece] = React.useState(null);
+	const positions = [], setPositions = [];
+	for(p of props.pieces) [positions[p.id], setPositions[p.id]] = React.useState(p.position);
+
+	const hasFloating = () => !! positions.find(pos => pos.isFloating);
+	const getFloating = () => props.pieces.find(p => positions[p.id].isFloating);
+
+	const resetFloating = () => {
+		for(p of props.pieces) setPositions[p.id]({
+			x: positions[p.id].x,
+			y: positions[p.id].y,
+			face: positions[p.id].face,
+			player: positions[p.id].player,
+			isOut: positions[p.id].isOut,
+			isFloating: false,
+		})
+	}
 
 	const handlePieceClick = (piece) => {
-		if(floatingPiece) return;
-		setFloatingPiece(piece);
+		if(hasFloating()) return;
+		setPositions[piece.id]({
+			x: positions[piece.id].x,
+			y: positions[piece.id].y,
+			face: positions[piece.id].face,
+			player: positions[piece.id].player,
+			isOut: positions[piece.id].isOut,
+			isFloating: true,
+		});
 	}
+	const handlePieceDoubleClick = (piece) => {
+		setPositions[piece.id]({
+			x: positions[piece.id].x,
+			y: positions[piece.id].y,
+			face: 1 - positions[piece.id].face,
+			player: positions[piece.id].player,
+			isOut: positions[piece.id].isOut,
+			isFloating: false
+		});
+	}
+
 	const handleCellClick = (cell) => {
-		if( ! floatingPiece) return;
-		if(checkHasPiece(cell)){
-			setFloatingPiece(null);
+		if( ! hasFloating()) return;
+		if(getCellPieces(cell).length > 0){
+			resetFloating();
 			return;
 		}
-		floatingPiece.x = cell.x, floatingPiece.y = cell.y;
-		setFloatingPiece(null);
+		const floating = getFloating();
+		setPositions[floating.id]({
+			x: cell.x,
+			y: cell.y,
+			face: positions[floating.id].face,
+			player: positions[floating.id].player,
+			isOut: false,
+			isFloating: false
+		});
 	}
+	const handleKomadaiClick = (cell) => {
+		if( ! hasFloating()) return;
+		const floating = getFloating();
+		setPositions[floating.id]({
+			x: -1,
+			y: -1,
+			face: 0,
+			player: cell.player,
+			isOut: true,
+			isFloating: false
+		});
+	}
+	const getCellPieces = (cell) => props.pieces.filter(p =>
+		positions[p.id].x == cell.x && positions[p.id].y == cell.y && ! positions[p.id].isOut
+	);
+	const getKomadaiPieces = (player) => props.pieces.filter(p => 
+		positions[p.id].isOut && positions[p.id].player == player
+	);
 
-	const checkHasPiece = (cell) => !! props.pieces.find(p => p.x == cell.x && p.y == cell.y);
-
-	return <div className="board" style={{
-		gridTemplateColumns: "repeat(" + props.xSize + ", 1fr)",
-		gridTemplateRows: "repeat(" + props.ySize + ", 1fr)",
-	}}>
-		{props.cells.map(cell =>
-			<Cell
-				cell={cell}
-				key={cell.x + "/" + cell.y}
-				canAccept={ !! floatingPiece && ! checkHasPiece(cell)}
-				onClick={handleCellClick}
-			>
-				{props.pieces
-					.filter( p => (p.x == cell.x && p.y == cell.y))
-					.map(p =>
+	return (
+		<React.Fragment>
+			<div className="board komadai">
+				<Cell
+					cell={{x: 0, y: 0, player: 1}}
+					canAccept={hasFloating() && ! getKomadaiPieces(1).includes(getFloating())}
+					onClick={handleKomadaiClick}
+				>
+					{getKomadaiPieces(1).map((p, i) =>
 						<Piece
 							piece={p}
-							key={cell.x + "/" + cell.y + "/" + p.name}
-							isFloating={floatingPiece == p}
-							isPickable={ ! floatingPiece}
+							position={positions[p.id]}
+							key={i}
+							isPickable={! hasFloating()}
 							onClick={handlePieceClick}
+							onDoubleClick={handlePieceDoubleClick}
 						/>
-					)
-				}
-			</Cell>
-		)}
-	</div>
+					)}
+				</Cell>
+			</div>
+			<div className="board" style={{
+				gridTemplateColumns: "repeat(" + props.xSize + ", 1fr)",
+				gridTemplateRows: "repeat(" + props.ySize + ", 1fr)",
+			}}>
+				{props.cells.map(cell =>
+					<Cell
+						cell={cell}
+						key={cell.x + "/" + cell.y}
+						canAccept={ hasFloating() && getCellPieces(cell).length == 0}
+						onClick={handleCellClick}
+					>
+					{getCellPieces(cell).map((p, i) => 
+						<Piece
+							piece={p}
+							position={positions[p.id]}
+							key={i}
+							isPickable={! hasFloating()}
+							onClick={handlePieceClick}
+							onDoubleClick={handlePieceDoubleClick}
+						/>
+					)}
+					</Cell>
+				)}
+			</div>
+			<div className="board komadai">
+				<Cell
+					cell={{x: 0, y: 0, player: 0}}
+					canAccept={hasFloating() && ! getKomadaiPieces(0).includes(getFloating())}
+					onClick={handleKomadaiClick}
+				>
+					{getKomadaiPieces(0).map((p, i) =>
+						<Piece
+							piece={p}
+							position={positions[p.id]}
+							key={i}
+							isPickable={! hasFloating()}
+							onClick={handlePieceClick}
+							onDoubleClick={handlePieceDoubleClick}
+						/>
+					)}
+				</Cell>
+			</div>
+		</React.Fragment>
+	)
 };

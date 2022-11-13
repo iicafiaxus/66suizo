@@ -6,5 +6,7 @@ const Cell = function(props){
 			gridColumn: (props.cell.y + 1),
 		}}
 		onClick={() => props.onClick(props.cell)}
-	>{props.children}</div>
+	>
+		{props.children}
+	</div>
 }
