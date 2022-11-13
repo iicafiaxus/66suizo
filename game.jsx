@@ -69,7 +69,6 @@ const Game = function(props){
 
 	return (
 		<div>
-			<h1>6六酔象将棋</h1>
 			<Board
 				xSize={xSize} ySize={ySize}
 				cells={cells}
