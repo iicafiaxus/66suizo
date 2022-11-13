@@ -36,35 +36,32 @@ const Game = function(props){
 		for(let p of Model.pieces.filter(p =>
 			positions[p.id].x == cell.x && positions[p.id].y == cell.y
 		)) moveToKomadai(p, positions[piece.id].player);
-		setPositions[piece.id]({
+		setPositions[piece.id](pos => ({
+			...pos,
 			x: cell.x,
 			y: cell.y,
-			face: positions[piece.id].face,
-			player: positions[piece.id].player,
 			isOut: false,
 			isFloating: false
-		});
+		}));
 	};
 	const moveToKomadai = (piece, player) => {
-		setPositions[piece.id]({
+		setPositions[piece.id](pos => ({
+			...pos, 
 			x: -1,
 			y: -1,
 			face: 0,
 			player: player,
 			isOut: true,
 			isFloating: false
-		});
+		}));
 	};
 
 	const promote = (piece) => {
-		setPositions[piece.id]({
-			x: positions[piece.id].x,
-			y: positions[piece.id].y,
+		setPositions[piece.id](pos => ({
+			...pos,
 			face: 1 - positions[piece.id].face,
-			player: positions[piece.id].player,
-			isOut: positions[piece.id].isOut,
 			isFloating: false
-		});
+		}));
 	}
 
 	return (
