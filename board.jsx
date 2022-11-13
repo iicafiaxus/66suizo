@@ -76,6 +76,18 @@ const Board = function(props){
 		positions[p.id].isOut && positions[p.id].player == player
 	);
 
+	// TODO: context
+	const renderPieces = (pieces) => pieces.map((p, i) => 
+		<Piece
+			piece={p}
+			position={positions[p.id]}
+			key={i}
+			isPickable={! hasFloating()}
+			onClick={handlePieceClick}
+			onDoubleClick={handlePieceDoubleClick}
+		/>
+	);
+
 	return (
 		<React.Fragment>
 			<div className="board komadai">
@@ -84,16 +96,7 @@ const Board = function(props){
 					canAccept={hasFloating() && ! getKomadaiPieces(1).includes(getFloating())}
 					onClick={handleKomadaiClick}
 				>
-					{getKomadaiPieces(1).map((p, i) =>
-						<Piece
-							piece={p}
-							position={positions[p.id]}
-							key={i}
-							isPickable={! hasFloating()}
-							onClick={handlePieceClick}
-							onDoubleClick={handlePieceDoubleClick}
-						/>
-					)}
+					{renderPieces(getKomadaiPieces(1))}
 				</Cell>
 			</div>
 			<div className="board" style={{
@@ -107,16 +110,7 @@ const Board = function(props){
 						canAccept={ hasFloating() && getCellPieces(cell).length == 0}
 						onClick={handleCellClick}
 					>
-					{getCellPieces(cell).map((p, i) => 
-						<Piece
-							piece={p}
-							position={positions[p.id]}
-							key={i}
-							isPickable={! hasFloating()}
-							onClick={handlePieceClick}
-							onDoubleClick={handlePieceDoubleClick}
-						/>
-					)}
+					{renderPieces(getCellPieces(cell))}
 					</Cell>
 				)}
 			</div>
@@ -126,16 +120,7 @@ const Board = function(props){
 					canAccept={hasFloating() && ! getKomadaiPieces(0).includes(getFloating())}
 					onClick={handleKomadaiClick}
 				>
-					{getKomadaiPieces(0).map((p, i) =>
-						<Piece
-							piece={p}
-							position={positions[p.id]}
-							key={i}
-							isPickable={! hasFloating()}
-							onClick={handlePieceClick}
-							onDoubleClick={handlePieceDoubleClick}
-						/>
-					)}
+					{renderPieces(getKomadaiPieces(0))}
 				</Cell>
 			</div>
 		</React.Fragment>
