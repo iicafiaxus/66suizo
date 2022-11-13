@@ -5,7 +5,7 @@ const Piece = function(props){
 			"player" + props.position.player,
 			"size" + props.piece.entity.size,
 			"face" + props.position.face,
-			(props.position.isFloating ? " floating" : ""),
+			(props.isFloating ? " floating" : ""),
 			(props.isPickable ? " pickable" : "")
 		].join(" ")}
 		onClick={() => props.onClick(props.piece)}

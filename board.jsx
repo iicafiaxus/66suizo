@@ -2,87 +2,46 @@
 "REQUIRE piece.jsx"
 
 const Board = function(props){
-	const positions = [], setPositions = [];
-	for(p of props.pieces) [positions[p.id], setPositions[p.id]] = React.useState(p.position);
-
-	const hasFloating = () => !! positions.find(pos => pos.isFloating);
-	const getFloating = () => props.pieces.find(p => positions[p.id].isFloating);
-
-	const resetFloating = () => {
-		for(p of props.pieces) setPositions[p.id]({
-			x: positions[p.id].x,
-			y: positions[p.id].y,
-			face: positions[p.id].face,
-			player: positions[p.id].player,
-			isOut: positions[p.id].isOut,
-			isFloating: false,
-		})
-	}
+	const [floating, setFloating] = React.useState(null);
 
 	const handlePieceClick = (piece) => {
-		if(hasFloating()) return;
-		setPositions[piece.id]({
-			x: positions[piece.id].x,
-			y: positions[piece.id].y,
-			face: positions[piece.id].face,
-			player: positions[piece.id].player,
-			isOut: positions[piece.id].isOut,
-			isFloating: true,
-		});
+		if(floating) return;
+		setFloating(piece);
 	}
 	const handlePieceDoubleClick = (piece) => {
-		setPositions[piece.id]({
-			x: positions[piece.id].x,
-			y: positions[piece.id].y,
-			face: 1 - positions[piece.id].face,
-			player: positions[piece.id].player,
-			isOut: positions[piece.id].isOut,
-			isFloating: false
-		});
+		props.promote(piece);
+		setFloating(null);
 	}
 
 	const handleCellClick = (cell) => {
-		if( ! hasFloating()) return;
-		if(getCellPieces(cell).length > 0){
-			resetFloating();
+		if( ! floating) return;
+		if( ! props.checkCanMove(floating, cell)){
+			setFloating(null);
 			return;
 		}
-		const floating = getFloating();
-		setPositions[floating.id]({
-			x: cell.x,
-			y: cell.y,
-			face: positions[floating.id].face,
-			player: positions[floating.id].player,
-			isOut: false,
-			isFloating: false
-		});
+		else props.move(floating, cell);
+		setFloating(null);
 	}
 	const handleKomadaiClick = (cell) => {
-		if( ! hasFloating()) return;
-		const floating = getFloating();
-		setPositions[floating.id]({
-			x: -1,
-			y: -1,
-			face: 0,
-			player: cell.player,
-			isOut: true,
-			isFloating: false
-		});
+		if( ! floating) return;
+		props.moveToKomadai(floating, cell.player);
+		setFloating(null);
 	}
 	const getCellPieces = (cell) => props.pieces.filter(p =>
-		positions[p.id].x == cell.x && positions[p.id].y == cell.y && ! positions[p.id].isOut
+		! props.positions[p.id].isOut && props.positions[p.id].x == cell.x && props.positions[p.id].y == cell.y
 	);
 	const getKomadaiPieces = (player) => props.pieces.filter(p => 
-		positions[p.id].isOut && positions[p.id].player == player
+		props.positions[p.id].isOut && props.positions[p.id].player == player
 	);
 
 	// TODO: context
 	const renderPieces = (pieces) => pieces.map((p, i) => 
 		<Piece
 			piece={p}
-			position={positions[p.id]}
+			position={props.positions[p.id]}
 			key={i}
-			isPickable={! hasFloating()}
+			isPickable={! floating}
+			isFloating={floating == p}
 			onClick={handlePieceClick}
 			onDoubleClick={handlePieceDoubleClick}
 		/>
@@ -93,7 +52,7 @@ const Board = function(props){
 			<div className="board komadai">
 				<Cell
 					cell={{x: 0, y: 0, player: 1}}
-					canAccept={hasFloating() && ! getKomadaiPieces(1).includes(getFloating())}
+					canAccept={floating && ! getKomadaiPieces(1).includes(floating)}
 					onClick={handleKomadaiClick}
 				>
 					{renderPieces(getKomadaiPieces(1))}
@@ -107,7 +66,7 @@ const Board = function(props){
 					<Cell
 						cell={cell}
 						key={cell.x + "/" + cell.y}
-						canAccept={ hasFloating() && getCellPieces(cell).length == 0}
+						canAccept={floating && props.checkCanMove(floating, cell)}
 						onClick={handleCellClick}
 					>
 					{renderPieces(getCellPieces(cell))}
@@ -117,7 +76,7 @@ const Board = function(props){
 			<div className="board komadai">
 				<Cell
 					cell={{x: 0, y: 0, player: 0}}
-					canAccept={hasFloating() && ! getKomadaiPieces(0).includes(getFloating())}
+					canAccept={floating && ! getKomadaiPieces(0).includes(floating)}
 					onClick={handleKomadaiClick}
 				>
 					{renderPieces(getKomadaiPieces(0))}
