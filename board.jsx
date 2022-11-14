@@ -61,15 +61,19 @@ const Board = function(props){
 
 	return (
 		<React.Fragment>
-			<div className="board komadai">
-				<Cell
-					cell={{x: 0, y: 0, player: 1}}
-					canAccept={floating && ! getKomadaiPieces(1).includes(floating)}
-					onClick={handleKomadaiClick}
-				>
-					{renderPieces(getKomadaiPieces(1))}
-				</Cell>
+			<div className="boardside player1">
+				<div className="board komadai player1">
+					<Cell
+						cell={{x: 0, y: 0, player: 1}}
+						canAccept={floating && ! getKomadaiPieces(1).includes(floating)}
+						onClick={handleKomadaiClick}
+					>
+						{renderPieces(getKomadaiPieces(1))}
+					</Cell>
+				</div>
+				<div className="systemarea"></div>
 			</div>
+
 			<div className="board" style={{
 				gridTemplateColumns: "repeat(" + props.xSize + ", 1fr)",
 				gridTemplateRows: "repeat(" + props.ySize + ", 1fr)",
@@ -85,15 +89,20 @@ const Board = function(props){
 					</Cell>
 				)}
 			</div>
-			<div className="board komadai">
-				<Cell
-					cell={{x: 0, y: 0, player: 0}}
-					canAccept={floating && ! getKomadaiPieces(0).includes(floating)}
-					onClick={handleKomadaiClick}
-				>
-					{renderPieces(getKomadaiPieces(0))}
-				</Cell>
+
+			<div className="boardside player0">
+				<div className="systemarea"></div>
+				<div className="board komadai player0">
+					<Cell
+						cell={{x: 0, y: 0, player: 0}}
+						canAccept={floating && ! getKomadaiPieces(0).includes(floating)}
+						onClick={handleKomadaiClick}
+					>
+						{renderPieces(getKomadaiPieces(0))}
+					</Cell>
+				</div>
 			</div>
+
 			{isWaitingPromotion && <Modal onClose={() => endWaitingPromotion(false)}>
 				<button onClick={() => endWaitingPromotion(true)}>成る</button>
 				<button onClick={() => endWaitingPromotion(false)}>成らない</button>
