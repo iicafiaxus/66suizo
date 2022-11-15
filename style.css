@@ -48,10 +48,19 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .cell.accepting {
 	cursor: pointer;
 }
-.cell.accepting:hover {
-	outline: 2px dashed #970d;
-	outline-offset: -8px;
+@media (hover: hover) {
+	.cell.accepting:hover {
+		outline: 2px dashed #970d;
+		outline-offset: -8px;
+	}
 }
+@media (hover: none) {
+	.cell.accepting {
+		outline: 2px dashed #970d;
+		outline-offset: -8px;
+	}
+}
+
 .board.komadai .cell{
 	display: flex;
 	flex-wrap: wrap;
