@@ -1,6 +1,6 @@
 "REQUIRE cell.jsx";
 "REQUIRE piece.jsx";
-"REQUIRE modal.jsx";
+"REQUIRE systemarea.jsx";
 
 const Board = function(props){
 	const [floating, setFloating] = React.useState(null);
@@ -72,7 +72,7 @@ const Board = function(props){
 						{renderPieces(getKomadaiPieces(1))}
 					</Cell>
 				</div>
-				<div className="systemarea"></div>
+				<SystemArea player="1" isActive={props.turn == "1"} />
 			</div>
 
 			<div className="board" style={{
@@ -92,7 +92,7 @@ const Board = function(props){
 			</div>
 
 			<div className="boardside player0">
-				<div className="systemarea"></div>
+				<SystemArea player="0" isActive={props.turn == "0"} />
 				<div className="board komadai player0">
 					<Cell
 						cell={{x: 0, y: 0, player: 0}}

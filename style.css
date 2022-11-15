@@ -31,10 +31,23 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .boardside {
 	width: 900px; height: 316px;
 	margin: 8px auto;
-	display: flex; 
+	display: flex; justify-content: space-between;
 }
 .boardside .systemarea{
-	width: 200px;
+	width: 172px; height: 300px; margin: 8px auto;
+	display: flex; flex-direction: column;
+}
+.boardside.player1 .systemarea{
+	flex-direction: column-reverse;
+}
+
+.boardside .systemarea .turn-indicator{
+	height: 16px;
+	background: #ccc;
+}
+.boardside .systemarea .turn-indicator.active{
+	height: 16px;
+	background: #c33;
 }
 
 
