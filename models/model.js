@@ -15,6 +15,8 @@ model.cells = (function(model){
 
 model.pieces = pieceModel.pieces;
 
+model.turn = 0;
+
 model.checkCanMove = (piece, cell, positions) => {
 	if(positions.find(pos =>
 		pos.x == cell.x && pos.y == cell.y && pos.player == positions[piece.id].player
@@ -45,4 +47,8 @@ model.checkPromotion = (piece, cell, positions) => {
 	if(player == 0 && cell.x < piece.entity.forcePromotion) return [false, true];
 	if(player == 1 && cell.x > 5 - piece.entity.forcePromotion) return [false, true];
 	return [true, true];
+}
+
+model.checkIsPickable = (piece, positions, turn) => {
+	return positions[piece.id].player == turn;
 }

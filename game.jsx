@@ -13,6 +13,8 @@ const Game = function(props){
 		[positions[p.id], setPositions[p.id]] = React.useState(p.position);
 	}
 
+	const [turn, setTurn] = React.useState(model.turn);
+
 	const move = (piece, cell, face) => {
 		for(let p of pieces.filter(p =>
 			positions[p.id].x == cell.x && positions[p.id].y == cell.y
@@ -25,6 +27,7 @@ const Game = function(props){
 			isOut: false,
 			isFloating: false
 		}));
+		setTurn(1 - turn);
 	};
 	const moveToKomadai = (piece, player) => {
 		setPositions[piece.id](pos => ({
@@ -53,7 +56,9 @@ const Game = function(props){
 				cells={cells}
 				pieces={pieces}
 				positions={pieces.map(p => positions[p.id])}
+				turn={turn}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
+				checkIsPickable={(piece) => model.checkIsPickable(piece, positions, turn)}
 				checkPromotion={(piece, cell) => model.checkPromotion(piece, cell, positions)}
 				move={move}
 				moveToKomadai={moveToKomadai}

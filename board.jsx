@@ -8,6 +8,7 @@ const Board = function(props){
 
 	const handlePieceClick = (piece) => {
 		if(floating) return;
+		if( ! props.checkIsPickable(piece)) return;
 		setFloating(piece);
 	}
 
@@ -53,7 +54,7 @@ const Board = function(props){
 			piece={p}
 			position={props.positions[p.id]}
 			key={i}
-			isPickable={! floating}
+			isPickable={! floating && props.checkIsPickable(p)}
 			isFloating={floating == p}
 			onClick={handlePieceClick}
 		/>
