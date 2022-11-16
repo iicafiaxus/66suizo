@@ -1,5 +1,6 @@
 "REQUIRE cell.jsx";
 "REQUIRE piece.jsx";
+"REQUIRE modal.jsx";
 "REQUIRE systemarea.jsx";
 
 const Board = function(props){
