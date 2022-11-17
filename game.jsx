@@ -14,6 +14,9 @@ const Game = function(props){
 	}
 
 	const [turn, setTurn] = React.useState(model.turn);
+	React.useEffect(() => {
+		model.clocks[turn].start();
+	}, [turn]);
 
 	const move = (piece, cell, face) => {
 		for(let p of pieces.filter(p =>
@@ -27,6 +30,8 @@ const Game = function(props){
 			isOut: false,
 			isFloating: false
 		}));
+		model.clocks[turn].stop();
+		model.clocks[1 - turn].start();
 		setTurn(1 - turn);
 	};
 	const moveToKomadai = (piece, player) => {
@@ -49,12 +54,23 @@ const Game = function(props){
 		}));
 	}
 
+	const [times, setTimes] = React.useState([0, 0]);
+	React.useEffect(() => {
+		const hndTimer = setTimeout(() => {
+			setTimes([0, 1].map(t => model.clocks[t].getTime()));
+		}, Math.min(1000 - times[1] % 1000, 1000 - times[0] % 1000));
+		return () => {
+			clearTimeout(hndTimer);
+		}
+	}, [times]);
+
 	return (
 		<div>
 			<Board
 				xSize={xSize} ySize={ySize}
 				cells={cells}
 				pieces={pieces}
+				times={times}
 				positions={pieces.map(p => positions[p.id])}
 				turn={turn}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}

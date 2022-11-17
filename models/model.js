@@ -52,3 +52,26 @@ model.checkPromotion = (piece, cell, positions) => {
 model.checkIsPickable = (piece, positions, turn) => {
 	return positions[piece.id].player == turn;
 }
+
+model.clocks = [0, 1].map(player => ({
+	id: player,
+	isRunning: false,
+	timeZero: 0,
+	timeSpent: 0,
+	timerHandle: null,
+	getTime: function(){
+		return this.timeSpent + (this.isRunning ? (Date.now() - this.timeZero) : 0);
+	},
+	start: function(){
+		this.isRunning = true;
+		this.timeZero = Date.now();
+	},
+	stop: function(){
+		this.timeSpent = this.getTime();
+		this.isRunning = false;
+	},
+	reset: function(){
+		this.isRunning = false;
+		this.timeSpent = 0;
+	}
+}));

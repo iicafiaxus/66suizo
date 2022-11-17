@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600');
+@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 * {
 	font-family: "Arial", sans-serif;
 	-webkit-tap-highlight-color: #0000;
@@ -45,9 +46,23 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	height: 16px;
 	background: #ccc;
 }
+@keyframes turn-indicator{
+	0% { background: #c336; }
+	50%{ background: #c333; }
+	100%{ background: #c336; }
+}
 .boardside .systemarea .turn-indicator.active{
 	height: 16px;
-	background: #c33;
+	animation: turn-indicator 1s infinite;
+}
+.boardside .systemarea .timer{
+	text-align: center;
+	font-size: 56px;
+	font-family: Nunito;
+	color: #666;
+}
+.boardside .systemarea .turn-indicator.active + .timer{
+	color: #600;
 }
 
 
