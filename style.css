@@ -51,7 +51,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	50%{ background: #c333; }
 	100%{ background: #c336; }
 }
-.boardside .systemarea .turn-indicator.active{
+.boardside .systemarea.active .turn-indicator{
 	height: 16px;
 	animation: turn-indicator 1s infinite;
 }
@@ -61,7 +61,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	font-family: Nunito;
 	color: #666;
 }
-.boardside .systemarea .turn-indicator.active + .timer{
+.boardside .systemarea.active .timer{
 	color: #600;
 }
 

@@ -15,12 +15,11 @@ const SystemArea = function(props){
 		return fillertext.substring(fillertext.length - filler.length);
 	}
 
-	return <div className="systemarea">
+	return <div className={"systemarea" + (props.isActive ? " active" : "")}>
+		<div className="timer">{formatTime(props.time)}</div>
 		<div className={[
 			"turn-indicator",
 			"player" + props.player,
-			(props.isActive ? "active" : "")
 			].join(" ")} />
-		<div className="timer">{formatTime(props.time)}</div>
 	</div>
 }
