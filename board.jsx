@@ -39,7 +39,8 @@ const Board = function(props){
 		! props.positions[p.id].isOut && props.positions[p.id].x == cell.x && props.positions[p.id].y == cell.y
 	);
 	const getKomadaiPieces = (player) => props.pieces.filter(p => 
-		props.positions[p.id].isOut && props.positions[p.id].player == player
+		props.positions[p.id].isOut && props.positions[p.id].player == player &&
+		! props.positions[p.id].isExcluded
 	);
 
 	const endWaitingPromotion = (yes) => {

@@ -42,7 +42,8 @@ const Game = function(props){
 			face: 0,
 			player: player,
 			isOut: true,
-			isFloating: false
+			isFloating: false,
+			isExcluded: piece.entity.isSingleUse,
 		}));
 	};
 
