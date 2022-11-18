@@ -19,6 +19,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	border: 3px solid;
 	margin: 8px auto; 
 	background: #eed;
+	user-select: none;
 }
 .board.komadai{
 	width: 700px; height: 300px;
@@ -33,6 +34,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	width: 900px; height: 316px;
 	margin: 8px auto;
 	display: flex; justify-content: space-between;
+	user-select: none;
 }
 .boardside .systemarea{
 	width: 172px; height: 300px; margin: 8px auto;
