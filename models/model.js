@@ -26,7 +26,13 @@ model.checkCanMove = (piece, cell, positions) => {
 		const player = positions[piece.id].player;
 		if(player == 0 && cell.x < piece.entity.forcePromotion) return false;
 		if(player == 1 && cell.x > 5 - piece.entity.forcePromotion) return false;
-		return true; // TODO: 二歩
+		if(piece.entity.occupiesColumn){
+			if(model.pieces.find(p => 
+				positions[p.id].y == cell.y && positions[p.id].player == player &&
+				p.entity == piece.entity
+			)) return false;
+		}
+		return true;
 	}
 	for(let line of piece.entity.lines[positions[piece.id].face]){
 		for(let t of line){

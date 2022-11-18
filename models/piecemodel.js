@@ -6,7 +6,7 @@ pieceModel.entities = {
 	rook: { names: ["飛車", "龍王"], size: 3, forcePromotion: 0 },
 	bishop: { names: ["角行", "龍馬"], size: 3, forcePromotion: 0 },
 	silver: { names: ["銀将", "金"], size: 2, forcePromotion: 0 },
-	pawn: { names: ["歩兵", "と"], size: 1, forcePromotion: 1 },
+	pawn: { names: ["歩兵", "と"], size: 1, forcePromotion: 1, occupiesColumn: true },
 };
 
 pieceModel.entities.king.lines = [[
