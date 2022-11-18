@@ -56,13 +56,14 @@ const Game = function(props){
 
 	const [times, setTimes] = React.useState([0, 0]);
 	React.useEffect(() => {
+		console.log(times[0], times[1]);
 		const hndTimer = setTimeout(() => {
 			setTimes([0, 1].map(t => model.clocks[t].getTime()));
-		}, Math.min(1000 - times[1] % 1000, 1000 - times[0] % 1000));
+		}, 1000 - times[turn] % 1000);
 		return () => {
 			clearTimeout(hndTimer);
 		}
-	}, [times]);
+	}, [times, turn]);
 
 	return (
 		<div>
