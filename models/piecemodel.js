@@ -11,7 +11,7 @@ pieceModel.entities = {
 
 pieceModel.entities.king.lines = [[
 	[{dx: -1, dy: -1}], [{dx: -1, dy: 0}], [{dx: -1, dy: 1}], [{dx: 0, dy: -1}],
-	[{dx: 0, dy: 1}], [{dx: 1, dy: -1}], [{dx: 1, dy: 0}], [{dx: 0, dy: 1}],
+	[{dx: 0, dy: 1}], [{dx: 1, dy: -1}], [{dx: 1, dy: 0}], [{dx: 1, dy: 1}],
 ],[
 ]];
 pieceModel.entities.queen.lines = [[
