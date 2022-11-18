@@ -33,7 +33,6 @@ const Board = function(props){
 	}
 	const handleKomadaiClick = (cell) => {
 		if( ! floating) return;
-		props.moveToKomadai(floating, cell.player);
 		setFloating(null);
 	}
 	const getCellPieces = (cell) => props.pieces.filter(p =>
@@ -67,7 +66,7 @@ const Board = function(props){
 				<div className="board komadai player1">
 					<Cell
 						cell={{x: 0, y: 0, player: 1}}
-						canAccept={floating && ! getKomadaiPieces(1).includes(floating)}
+						canAccept={false}
 						onClick={handleKomadaiClick}
 					>
 						{renderPieces(getKomadaiPieces(1))}
@@ -103,7 +102,7 @@ const Board = function(props){
 				<div className="board komadai player0">
 					<Cell
 						cell={{x: 0, y: 0, player: 0}}
-						canAccept={floating && ! getKomadaiPieces(0).includes(floating)}
+						canAccept={false}
 						onClick={handleKomadaiClick}
 					>
 						{renderPieces(getKomadaiPieces(0))}
