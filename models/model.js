@@ -23,7 +23,10 @@ model.checkCanMove = (piece, cell, positions) => {
 	)) return false;
 	if(positions[piece.id].isOut){
 		if(positions.find(pos => pos.x == cell.x && pos.y == cell.y)) return false;
-		else return true; // TODO: 行きどころのない駒、二歩
+		const player = positions[piece.id].player;
+		if(player == 0 && cell.x < piece.entity.forcePromotion) return false;
+		if(player == 1 && cell.x > 5 - piece.entity.forcePromotion) return false;
+		return true; // TODO: 二歩
 	}
 	for(let line of piece.entity.lines[positions[piece.id].face]){
 		for(let t of line){
