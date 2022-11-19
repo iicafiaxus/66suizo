@@ -85,15 +85,25 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	cursor: pointer;
 }
 @media (hover: hover) {
-	.cell.accepting:hover {
-		outline: 2px dashed #970d;
+	.cell.accepting:hover, .piece.floating{
+		outline: 2px dashed #600d;
+	}
+	.cell.accepting:hover{
 		outline-offset: -8px;
+	}
+	.piece.floating{
+		outline-offset: 8px;
 	}
 }
 @media (hover: none) {
-	.cell.accepting {
-		outline: 2px dashed #970d;
+	.cell.accepting, .piece.floating{
+		outline: 2px dashed #600d;
+	}
+	.cell.accepting{
 		outline-offset: -8px;
+	}
+	.piece.floating{
+		outline-offset: 2px;
 	}
 }
 
@@ -115,11 +125,6 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .piece.pickable {
 	cursor: pointer;
-}
-
-.piece.floating{
-	outline: 2px dashed #970d;
-	outline-offset: 4px;
 }
 
 .piece.face0{
