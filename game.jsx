@@ -35,7 +35,7 @@ const Game = function(props){
 		title: "",
 		message: "",
 		options: [
-			{ caption: "今すぐ対局開始", onClick: start, isPrimary: true },
+			{ caption: "対局開始", onClick: start, isPrimary: true },
 			{ caption: "あとで", onClick: stop },
 		]
 	});
