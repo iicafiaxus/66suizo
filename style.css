@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600');
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap');
 * {
-	font-family: "Arial", sans-serif;
+	font-family: "Nunito", "BIZ UDPMincho", sans-serif;
 	-webkit-tap-highlight-color: #0000;
 }
 html, body { margin: 0; padding: 0; }
@@ -18,9 +19,13 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	display: grid; width: 900px; height: 1050px;
 	border: 3px solid;
 	margin: 8px auto; 
-	background: #eed;
+	background: #eee;
 	user-select: none;
 }
+.board.running, .running .board {
+	background: #eed;
+}
+
 .board.komadai{
 	width: 700px; height: 300px;
 	border: none;
@@ -53,7 +58,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	50%{ background: #c333; }
 	100%{ background: #c336; }
 }
-.boardside .systemarea.active .turn-indicator{
+.boardside.running .systemarea.active .turn-indicator{
 	height: 16px;
 	animation: turn-indicator 1s infinite;
 }
@@ -63,7 +68,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	font-family: Nunito;
 	color: #666;
 }
-.boardside .systemarea.active .timer{
+.boardside.running .systemarea.active .timer{
 	color: #600;
 }
 
