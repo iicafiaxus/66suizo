@@ -50,6 +50,7 @@ const Game = function(props){
 	}, [isRunning, positions]);
 
 	const move = (piece, cell) => {
+		if( ! model.checkCanMove(piece, cell, positions)) return;
 		const promo = model.checkPromotion(piece, cell, positions);
 		if(promo[0] && promo[1]){
 			setAlert({

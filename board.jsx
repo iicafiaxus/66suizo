@@ -14,14 +14,8 @@ const Board = function(props){
 
 	const handleCellClick = (cell) => {
 		if( ! floating) return;
-		if( ! props.checkCanMove(floating, cell)){
-			setFloating(null);
-			return;
-		}
-		else{
-			props.move(floating, cell);
-			setFloating(null);
-		}
+		props.move(floating, cell);
+		setFloating(null);
 	}
 	const handleKomadaiClick = (cell) => {
 		if( ! floating) return;
