@@ -17,19 +17,13 @@ const Game = function(props){
 
 	const [isRunning, setIsRunning] = React.useState(false);
 	const start = () => {
-		setIsStarting(false);
-		console.log("game start");
 		setIsRunning(true);
 		model.clocks[turn].start();
 	}
 	const stop = () => {
-		setIsStarting(false);
-		console.log("game stop");
 		model.clocks[turn].stop();
 		setIsRunning(false);
 	}
-
-	const [isStarting, setIsStarting] = React.useState(false);
 
 	const [alert, setAlert] = React.useState({
 		title: "",
@@ -40,7 +34,34 @@ const Game = function(props){
 		]
 	});
 
-	const move = (piece, cell, face) => {
+	React.useEffect(() => {
+		if( ! isRunning) return;
+		const winner = model.checkWinner(positions);
+		if(winner){
+			setAlert({
+				title: "",
+				message: ["先手", "後手"][winner.player] + "の勝ちです。",
+				options: [
+					{ caption: "OK", onClick: stop },
+				]
+			});
+			setIsRunning(false);
+		}
+	}, [isRunning, positions]);
+
+	const move = (piece, cell) => {
+		const promo = model.checkPromotion(piece, cell, positions);
+		if(promo[0] && promo[1]){
+			setAlert({
+				options: [
+					{ caption: "成る", onClick: () => moveWithFace(piece, cell, 1), isPrimary: true },
+					{ caption: "成らない", onClick: () => moveWithFace(piece, cell, 0) },
+				]				
+			});
+		}
+		else moveWithFace(piece, cell, promo[0] ? 0 : 1);
+	}
+	const moveWithFace = (piece, cell, face) => {
 		for(let p of pieces.filter(p =>
 			positions[p.id].x == cell.x && positions[p.id].y == cell.y
 		)) moveToKomadai(p, positions[piece.id].player);
@@ -69,14 +90,6 @@ const Game = function(props){
 		}));
 	};
 
-	const promote = (piece) => {
-		setPositions[piece.id](pos => ({
-			...pos,
-			face: 1 - positions[piece.id].face,
-			isFloating: false
-		}));
-	}
-
 	const [times, setTimes] = React.useState([0, 0]);
 	React.useEffect(() => {
 		if( ! isRunning) return;
@@ -100,10 +113,7 @@ const Game = function(props){
 				isRunning={isRunning}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
 				checkIsPickable={(piece) => isRunning && model.checkIsPickable(piece, positions, turn)}
-				checkPromotion={(piece, cell) => model.checkPromotion(piece, cell, positions)}
 				move={move}
-				moveToKomadai={moveToKomadai}
-				promote={promote}
 			/>
 
 			{alert && <Modal onClose={() => setAlert(null)}>
@@ -115,9 +125,7 @@ const Game = function(props){
 							className={opt.isPrimary ? "primaryButton" : ""}
 							onClick={() => {setAlert(null); opt.onClick()}}
 							key={opt.caption}
-						>
-							{opt.caption}
-						</button>
+						>{opt.caption}</button>
 					)}
 				</div>
 			</Modal>}

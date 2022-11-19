@@ -5,7 +5,6 @@
 
 const Board = function(props){
 	const [floating, setFloating] = React.useState(null);
-	const [isWaitingPromotion, setIsWaitingPromotion] = React.useState(false);
 
 	const handlePieceClick = (piece) => {
 		if(floating) return;
@@ -20,15 +19,8 @@ const Board = function(props){
 			return;
 		}
 		else{
-			const promo = props.checkPromotion(floating, cell);
-			if(promo[0] && promo[1]){
-				props.move(floating, cell, promo[0] ? 0 : 1);
-				setIsWaitingPromotion(true);
-			}
-			else{
-				props.move(floating, cell, promo[0] ? 0 : 1);
-				setFloating(null);
-			}
+			props.move(floating, cell);
+			setFloating(null);
 		}
 	}
 	const handleKomadaiClick = (cell) => {
@@ -42,12 +34,6 @@ const Board = function(props){
 		props.positions[p.id].isOut && props.positions[p.id].player == player &&
 		! props.positions[p.id].isExcluded
 	);
-
-	const endWaitingPromotion = (yes) => {
-		if(yes) props.promote(floating);
-		setIsWaitingPromotion(false);
-		setFloating(null);
-	}
 
 	// TODO: context
 	const renderPieces = (pieces) => pieces.map((p, i) => 
@@ -114,13 +100,6 @@ const Board = function(props){
 				</div>
 			</div>
 
-			{isWaitingPromotion && <Modal onClose={() => endWaitingPromotion(false)}>
-				<div className="modal-body">
-					<button className="primaryButton" onClick={() => endWaitingPromotion(true)}>成る</button>
-					<button onClick={() => endWaitingPromotion(false)}>成らない</button>
-				</div>
-			</Modal>}
-
-		</React.Fragment>
+	</React.Fragment>
 	)
 };

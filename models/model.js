@@ -17,6 +17,19 @@ model.pieces = pieceModel.pieces;
 
 model.turn = 0;
 
+model.checkWinner = (positions) => {
+	const life = [0, 0];
+	for(p of model.pieces){
+		const pos = positions[p.id];
+		if( ! pos.isOut && ! pos.isExcluded){
+			life[pos.player] += p.entity.life[pos.face];
+		}
+	}
+	if(life[0] == 0) return { player: 1 };
+	else if(life[1] == 0) return { player: 0 };
+	else return null;
+}
+
 model.checkCanMove = (piece, cell, positions) => {
 	if(positions.find(pos =>
 		pos.x == cell.x && pos.y == cell.y && pos.player == positions[piece.id].player
