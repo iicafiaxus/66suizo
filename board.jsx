@@ -115,13 +115,10 @@ const Board = function(props){
 			</div>
 
 			{isWaitingPromotion && <Modal onClose={() => endWaitingPromotion(false)}>
-				<button className="primaryButton" onClick={() => endWaitingPromotion(true)}>成る</button>
-				<button onClick={() => endWaitingPromotion(false)}>成らない</button>
-			</Modal>}
-
-			{props.isStarting && <Modal onClose={() => props.stop()}>
-				<button className="primaryButton" onClick={() => props.start()}>対局開始</button>
-				<button onClick={() => props.stop()}>あとで</button>
+				<div className="modal-body">
+					<button className="primaryButton" onClick={() => endWaitingPromotion(true)}>成る</button>
+					<button onClick={() => endWaitingPromotion(false)}>成らない</button>
+				</div>
 			</Modal>}
 
 		</React.Fragment>

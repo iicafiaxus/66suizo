@@ -181,18 +181,28 @@ h1 { text-align: center; letter-spacing: 0.1em; }
  	position: absolute; z-index: 1105;
 	background: #fffc; border-radius: 4px; border: 2px solid #ffff;
 	max-width: 90vw; max-height: 90vh; min-width: 50vw; min-height: min(30vw, 50vh);
-	padding: 16px;
 	left: 50%; top: 40%; transform: translate(-50%, -40%);
+	display: flex; flex-direction: column; justify-content: center;
+}
+.modal-title{
+	background: #f99;
+	padding: 8px; 
+}
+.modal-body {
+	padding: 16px;
 	display: flex; flex-direction: column; justify-content: center;
 }
 
 .modal-main *{
-	font-size: 30px; line-height: 64px;
+	font-size: 30px;
+}
+.modal-main .alert-message{
+	margin: 8px 0 24px;
 }
 .modal-main button{
 	min-height: 80px; 
 	font-size: 36px; 
-	margin: 16px 8px; 
+	margin: 4px 8px; 
 	cursor: pointer;
 }
 .modal-main button.primaryButton{

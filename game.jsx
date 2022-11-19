@@ -29,7 +29,16 @@ const Game = function(props){
 		setIsRunning(false);
 	}
 
-	const [isStarting, setIsStarting] = React.useState(true);
+	const [isStarting, setIsStarting] = React.useState(false);
+
+	const [alert, setAlert] = React.useState({
+		title: "",
+		message: "",
+		options: [
+			{ caption: "今すぐ対局開始", onClick: start, isPrimary: true },
+			{ caption: "あとで", onClick: stop },
+		]
+	});
 
 	const move = (piece, cell, face) => {
 		for(let p of pieces.filter(p =>
@@ -99,6 +108,22 @@ const Game = function(props){
 				start={start}
 				stop={stop}
 			/>
+
+			{alert && <Modal onClose={() => setAlert(null)}>
+				{alert.title && <div className="modal-title">{alert.title}</div>}
+				<div className="modal-body">
+					{alert.message && <div className="alert-message">{alert.message}</div>}
+					{alert.options.map(opt => 
+						<button
+							className={opt.isPrimary ? "primaryButton" : ""}
+							onClick={() => {setAlert(null); opt.onClick()}}
+							key={opt.caption}
+						>
+							{opt.caption}
+						</button>
+					)}
+				</div>
+			</Modal>}
 		</div>
 	)
 }
