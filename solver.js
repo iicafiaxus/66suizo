@@ -80,5 +80,14 @@ solver.cellToString = (cell) => {
 
 solver.moveToString = (move) => {
 	return move.piece.entity.names[0] + move.piece.id + " " + solver.cellToString(move.cell);
+}
 
+solver.calcPositionKey = (positions, turn) => {
+	let key ="";
+	for(let piece of model.pieces){
+		const pos = positions[piece.id];
+		key += "" + pos.x + pos.y + pos.face + pos.player + ",";
+	}
+	key += turn;
+	return key;
 }
