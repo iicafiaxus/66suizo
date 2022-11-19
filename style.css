@@ -142,17 +142,21 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 
 
 .piece.player0 {
-	/*background-image: url('images/828318-blue.png');*/
-	/*clip-path: polygon(50% 0%, 90% 10%, 100% 100%, 0% 100%, 10% 10%);*/
-	background: #09c6;
 	box-shadow: #8884 0px 4px 3px 3px;
+	background: #bbb6;
 }
 
 .piece.player1 {
-	/*background-image: url('images/828318-yellow.png');*/
 	transform: rotate(180deg);
-	background: #dc06;
 	box-shadow: #8884 -0px -4px 3px 3px;
+	background: #ccc6;
+}
+
+.running .piece.player0{
+	background: #09c6;
+}
+.running .piece.player1{
+	background: #dc06;
 }
 
 .modal-system {
@@ -176,4 +180,8 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .modal-main button{
 	margin: 16px 8px; 
+	cursor: pointer;
+}
+.modal-main button.primaryButton{
+	min-height: 120px;
 }

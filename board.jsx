@@ -63,7 +63,7 @@ const Board = function(props){
 
 	return (
 		<React.Fragment>
-			<div className="boardside player1">
+			<div className={"boardside player1" + (props.isRunning ? " running" : "")}>
 				<div className="board komadai player1">
 					<Cell
 						cell={{x: 0, y: 0, player: 1}}
@@ -79,10 +79,13 @@ const Board = function(props){
 				/>
 			</div>
 
-			<div className="board" style={{
-				gridTemplateColumns: "repeat(" + props.xSize + ", 1fr)",
-				gridTemplateRows: "repeat(" + props.ySize + ", 1fr)",
-			}}>
+			<div
+				className={"board" + (props.isRunning ? " running" : "")}
+				style={{
+					gridTemplateColumns: "repeat(" + props.xSize + ", 1fr)",
+					gridTemplateRows: "repeat(" + props.ySize + ", 1fr)",
+				}}
+			>
 				{props.cells.map(cell =>
 					<Cell
 						cell={cell}
@@ -95,7 +98,7 @@ const Board = function(props){
 				)}
 			</div>
 
-			<div className="boardside player0">
+			<div className={"boardside player0" + (props.isRunning ? " running" : "")}>
 				<SystemArea player="0"
 					isActive={props.turn == "0"}
 					time={props.times[0]}
@@ -112,9 +115,15 @@ const Board = function(props){
 			</div>
 
 			{isWaitingPromotion && <Modal onClose={() => endWaitingPromotion(false)}>
-				<button onClick={() => endWaitingPromotion(true)}>成る</button>
+				<button className="primaryButton" onClick={() => endWaitingPromotion(true)}>成る</button>
 				<button onClick={() => endWaitingPromotion(false)}>成らない</button>
 			</Modal>}
+
+			{props.isStarting && <Modal onClose={() => props.stop()}>
+				<button className="primaryButton" onClick={() => props.start()}>対局開始</button>
+				<button onClick={() => props.stop()}>あとで</button>
+			</Modal>}
+
 		</React.Fragment>
 	)
 };

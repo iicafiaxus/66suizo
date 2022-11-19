@@ -14,9 +14,22 @@ const Game = function(props){
 	}
 
 	const [turn, setTurn] = React.useState(model.turn);
-	React.useEffect(() => {
+
+	const [isRunning, setIsRunning] = React.useState(false);
+	const start = () => {
+		setIsStarting(false);
+		console.log("game start");
+		setIsRunning(true);
 		model.clocks[turn].start();
-	}, [turn]);
+	}
+	const stop = () => {
+		setIsStarting(false);
+		console.log("game stop");
+		model.clocks[turn].stop();
+		setIsRunning(false);
+	}
+
+	const [isStarting, setIsStarting] = React.useState(true);
 
 	const move = (piece, cell, face) => {
 		for(let p of pieces.filter(p =>
@@ -57,14 +70,14 @@ const Game = function(props){
 
 	const [times, setTimes] = React.useState([0, 0]);
 	React.useEffect(() => {
-		console.log(times[0], times[1]);
+		if( ! isRunning) return;
 		const hndTimer = setTimeout(() => {
 			setTimes([0, 1].map(t => model.clocks[t].getTime()));
 		}, 1000 - times[turn] % 1000);
 		return () => {
 			clearTimeout(hndTimer);
 		}
-	}, [times, turn]);
+	}, [times, turn, isRunning]);
 
 	return (
 		<div>
@@ -75,12 +88,16 @@ const Game = function(props){
 				times={times}
 				positions={pieces.map(p => positions[p.id])}
 				turn={turn}
+				isRunning={isRunning}
+				isStarting={isStarting}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
-				checkIsPickable={(piece) => model.checkIsPickable(piece, positions, turn)}
+				checkIsPickable={(piece) => isRunning && model.checkIsPickable(piece, positions, turn)}
 				checkPromotion={(piece, cell) => model.checkPromotion(piece, cell, positions)}
 				move={move}
 				moveToKomadai={moveToKomadai}
 				promote={promote}
+				start={start}
+				stop={stop}
 			/>
 		</div>
 	)
