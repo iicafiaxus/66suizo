@@ -98,15 +98,12 @@ const Game = function(props){
 				positions={pieces.map(p => positions[p.id])}
 				turn={turn}
 				isRunning={isRunning}
-				isStarting={isStarting}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
 				checkIsPickable={(piece) => isRunning && model.checkIsPickable(piece, positions, turn)}
 				checkPromotion={(piece, cell) => model.checkPromotion(piece, cell, positions)}
 				move={move}
 				moveToKomadai={moveToKomadai}
 				promote={promote}
-				start={start}
-				stop={stop}
 			/>
 
 			{alert && <Modal onClose={() => setAlert(null)}>
