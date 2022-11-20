@@ -74,7 +74,50 @@ solver.makePossibleMoves = (positions, player) => {
 	return moves;
 }
 
+// TODO: Integrate with Game.move
+// TODO: Recognize nonpromoting move
+// TODO: cell to piece
+solver.reducePositions = (positions, move) => {
+	const resultPositions = [];
+	for(p of model.pieces){
+		if(positions[p.id].x == move.cell.x && positions[p.id].y == move.cell.y){
+			resultPositions[p.id] = {
+				...positions[p.id],
+				isOut: true,
+				player: positions[move.piece.id].player,
+				isExcluded: p.entity.isSingleUse
+			}
+		}
+		else resultPositions[p.id] = { ...positions[p.id] };
+	}
+	const promo = model.checkPromotion(move.piece, move.cell, positions);
+	resultPositions[move.piece.id] = {
+		...positions[move.piece.id],
+		x: move.cell.x,
+		y: move.cell.y,
+		face: promo[1] ? 1 : 0,
+	}
+	return resultPositions;
+}
+
+solver.calcBestMove = (positions, turn) => {
+	const moves = solver.makePossibleMoves(positions, turn);
+	let bestValue = [-10000, 10000][turn];
+	let bestMove = null;
+	for(move of moves){
+		const movedPositions = solver.reducePositions(positions, move);
+		const movedValue = solver.evaluate(movedPositions);
+		if(turn == 0 && bestValue < movedValue || turn == 1 && bestValue > movedValue){
+			bestValue = movedValue;
+			bestMove = move;
+		}
+	}
+	return { move: bestMove, value: bestValue };
+}
+
+
 // TODO: improve
+// TODO: memoize
 solver.evaluate = (positions) => {
 	const winner = model.checkWinner(positions);
 	if(winner){
@@ -89,6 +132,8 @@ solver.cellToString = (cell) => {
 }
 
 solver.moveToString = (move) => {
+	if( ! move) return "(null)";
+	if( ! move.piece || ! move.cell) return "(" + move.piece + ", " + move.cell + ")";
 	return move.piece.entity.names[0] + move.piece.id + " " + solver.cellToString(move.cell);
 }
 
