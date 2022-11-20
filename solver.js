@@ -74,6 +74,16 @@ solver.makePossibleMoves = (positions, player) => {
 	return moves;
 }
 
+// TODO: improve
+solver.evaluate = (positions) => {
+	const winner = model.checkWinner(positions);
+	if(winner){
+		if(winner.player == 0) return 10000; else return -10000;
+	}
+	const moveCounts = [0, 1].map(t => solver.makePossibleMoves(positions, t).length);
+	return (moveCounts[0] - moveCounts[1]) * 100;
+}
+
 solver.cellToString = (cell) => {
 	return "" + (6 - cell.y) + ["一", "二", "三", "四", "五", "六"][cell.x];
 }
