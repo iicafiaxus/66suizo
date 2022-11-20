@@ -126,6 +126,12 @@ solver.evaluate = (positions) => {
 	return (moveCounts[0] - moveCounts[1]) * 100;
 }
 
+solver.solve = (positions, turn, onFound) => {
+	const bestMove = solver.calcBestMove(positions, turn).move;
+	console.log("solver found", bestMove);
+	onFound(bestMove);
+}
+
 solver.cellToString = (cell) => {
 	return "" + (6 - cell.y) + ["一", "二", "三", "四", "五", "六"][cell.x];
 }

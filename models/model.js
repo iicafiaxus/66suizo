@@ -17,6 +17,8 @@ model.pieces = pieceModel.pieces;
 
 model.turn = 0;
 
+model.useAi = [false, true];
+
 model.checkWinner = (positions) => {
 	const life = [0, 0];
 	for(p of model.pieces){

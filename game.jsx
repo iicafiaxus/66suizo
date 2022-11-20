@@ -93,6 +93,11 @@ const Game = function(props){
 		}));
 	};
 
+	const handleAiMove = (m) => { // m: move object
+		if(m) moveWithFace(m.piece, m.cell, m.face);
+		else return; // no possible move
+	}
+
 	const [times, setTimes] = React.useState([0, 0]);
 	React.useEffect(() => {
 		if( ! isRunning) return;
@@ -109,7 +114,11 @@ const Game = function(props){
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
 		checkWinner();
-	}, [isAfterMove, positions, turn]);
+		if( ! isRunning) return;
+		if(model.useAi[turn]){
+			solver.solve(positions, turn, handleAiMove);
+		}
+	}, [isRunning, isAfterMove, positions, turn]);
 
 	return (
 		<div>
