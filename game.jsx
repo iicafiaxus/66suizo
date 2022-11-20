@@ -1,4 +1,4 @@
-"REQUIRE util.jsx";
+"REQUIRE util.js";
 "REQUIRE piece.jsx";
 "REQUIRE board.jsx";
 "REQUIRE models/model.js";
@@ -95,7 +95,7 @@ const Game = function(props){
 
 	const handleAiMove = (m) => { // m: move object
 		if(m) moveWithFace(m.piece, m.cell, m.face);
-		else return; // no possible move
+		else setIsRunning(false); // no possible move
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);
@@ -113,7 +113,6 @@ const Game = function(props){
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
-		console.log(`評価値：${solver.evaluate(positions, turn)} 最善手 ${(x => `${solver.moveToString(x.move)} 評価値 ${x.value}`)(solver.calcBestMove(positions, turn))}`);
 		checkWinner();
 		if( ! isRunning) return;
 		if(model.useAi[turn]){

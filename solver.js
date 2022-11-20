@@ -1,4 +1,5 @@
 "REQUIRE models/model.js";
+"REQUIRE util.js";
 
 const solver = {};
 
@@ -79,7 +80,7 @@ solver.makePossibleMoves = (positions, player) => {
 // TODO: cell to piece
 solver.reducePositions = (positions, move) => {
 	const resultPositions = [];
-	for(p of model.pieces){
+	for(let p of model.pieces){
 		if(positions[p.id].x == move.cell.x && positions[p.id].y == move.cell.y){
 			resultPositions[p.id] = {
 				...positions[p.id],
@@ -103,15 +104,63 @@ solver.calcBestMove = (positions, turn) => {
 	const moves = solver.makePossibleMoves(positions, turn);
 	let bestValue = [-10000, 10000][turn];
 	let bestMove = null;
-	for(move of moves){
+	for(let move of moves){
 		const movedPositions = solver.reducePositions(positions, move);
-		const movedValue = solver.evaluate(movedPositions);
+		const movedValue = solver.evaluateDeep(move, movedPositions, turn, 1);
 		if(turn == 0 && bestValue < movedValue || turn == 1 && bestValue > movedValue){
 			bestValue = movedValue;
 			bestMove = move;
 		}
 	}
 	return { move: bestMove, value: bestValue };
+}
+
+// TODO: have multiple parents
+solver.EvaluationItem = function(positions, turn, depth, parent = null, move){
+	this.positions = positions;
+	this.turn = turn;
+	this.depth = depth;
+	this.parent = parent;
+	this.move = move;
+	this.value = [10000, -10000][turn];
+	this.nextItem = null;
+	// TODO: value should have uncertainity range
+}
+solver.EvaluationItem.prototype.update = function(kid){
+	if(this.turn == 0 && kid.value < this.value || this.turn == 1 && kid.value > this.value){
+		this.nextItem = kid;
+		this.setValue(kid.value);
+		if(this.parent) this.parent.update(this);
+	}
+}
+solver.EvaluationItem.prototype.setValue = function(value){
+	this.value = value;
+	if(this.parent) this.parent.update(this);
+}
+
+
+// TODO: priority queue
+// TODO: prune
+// TODO: pause for time or count
+// TODO: break for time or count
+solver.evaluateDeep = (move, positions, turn, depth = 3) => {
+	const queue = new Util.Queue();
+	const rootItem = new solver.EvaluationItem(positions, turn, depth, null, move);
+	queue.push(rootItem);
+	while(queue.getLength() > 0){
+		const item = queue.pop();
+		if(item.depth == 0){
+			item.setValue(solver.evaluate(item.positions));
+		}
+		else{
+			const moves = solver.makePossibleMoves(item.positions, 1 - item.turn);
+			for(let move of moves){
+				const movedPositions = solver.reducePositions(item.positions, move);
+				queue.push(new solver.EvaluationItem(movedPositions, 1 - item.turn, item.depth - 1, item, move));
+			}
+		}
+	}
+	return rootItem.value;
 }
 
 
