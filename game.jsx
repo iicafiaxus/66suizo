@@ -35,7 +35,7 @@ const Game = function(props){
 		]
 	});
 
-	React.useEffect(() => {
+	const checkWinner = () => {
 		if( ! isRunning) return;
 		const winner = model.checkWinner(positions);
 		if(winner){
@@ -48,7 +48,7 @@ const Game = function(props){
 			});
 			setIsRunning(false);
 		}
-	}, [isRunning, positions]);
+	};
 
 	const move = (piece, cell) => {
 		if( ! model.checkCanMove(piece, cell, positions)) return;
@@ -78,6 +78,7 @@ const Game = function(props){
 		model.clocks[turn].stop();
 		model.clocks[1 - turn].start();
 		setTurn(1 - turn);
+		setIsAfterMove(true);
 	};
 	const moveToKomadai = (piece, player) => {
 		setPositions[piece.id](pos => ({
@@ -103,8 +104,16 @@ const Game = function(props){
 		}
 	}, [times, turn, isRunning]);
 
+	const [isAfterMove, setIsAfterMove] = React.useState(false);
+	React.useEffect(() => {
+		if( ! isAfterMove) return;
+		setIsAfterMove(false);
+		checkWinner();
+	}, [isAfterMove, positions, turn]);
+
 	return (
 		<div>
+			<div>{solver.evaluate(positions, turn)} {(x => solver.moveToString(x.move) + " " + x.value)(solver.calcBestMove(positions, turn))}</div>
 			<Board
 				xSize={xSize} ySize={ySize}
 				cells={cells}
