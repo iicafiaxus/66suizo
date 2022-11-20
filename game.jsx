@@ -113,6 +113,7 @@ const Game = function(props){
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
+		console.log(`評価値：${solver.evaluate(positions, turn)} 最善手 ${(x => `${solver.moveToString(x.move)} 評価値 ${x.value}`)(solver.calcBestMove(positions, turn))}`);
 		checkWinner();
 		if( ! isRunning) return;
 		if(model.useAi[turn]){
@@ -122,7 +123,6 @@ const Game = function(props){
 
 	return (
 		<div>
-			<div>{solver.evaluate(positions, turn)} {(x => solver.moveToString(x.move) + " " + x.value)(solver.calcBestMove(positions, turn))}</div>
 			<Board
 				xSize={xSize} ySize={ySize}
 				cells={cells}
