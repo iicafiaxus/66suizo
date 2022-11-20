@@ -54,18 +54,18 @@ solver.makePossibleMoves = (positions, player) => {
 						p.entity == piece.entity
 					)) continue;
 				}
-				moves.push({ piece, cell });
+				moves.push({ piece, cell, face: 0 });
 			}
 		}
 		else{
 			const lines = solver.lines[player][piece.id][positions[piece.id].face][positions[piece.id].x][positions[piece.id].y];
 			for(let line of lines){
 				for(let cell of line){
-					if(occupiers[cell.id] >= 0){
-						if(occupiers[cell.id] != player) moves.push({ piece, cell });
-						break;
-					}
-					else moves.push({ piece, cell });
+					if(occupiers[cell.id] == player) break;
+					const promo = model.checkPromotion(piece, cell, positions);
+					if(promo[1]) moves.push({ piece, cell, face: 1 });
+					else moves.push({ piece, cell, face: 0 });
+					if(occupiers[cell.id] == 1 - player) break;
 				}
 			}
 		}
@@ -90,12 +90,11 @@ solver.reducePositions = (positions, move) => {
 		}
 		else resultPositions[p.id] = { ...positions[p.id] };
 	}
-	const promo = model.checkPromotion(move.piece, move.cell, positions);
 	resultPositions[move.piece.id] = {
 		...positions[move.piece.id],
 		x: move.cell.x,
 		y: move.cell.y,
-		face: promo[1] ? 1 : 0,
+		face: move.face,
 	}
 	return resultPositions;
 }
@@ -134,7 +133,7 @@ solver.cellToString = (cell) => {
 solver.moveToString = (move) => {
 	if( ! move) return "(null)";
 	if( ! move.piece || ! move.cell) return "(" + move.piece + ", " + move.cell + ")";
-	return move.piece.entity.names[0] + move.piece.id + " " + solver.cellToString(move.cell);
+	return solver.cellToString(move.cell) + move.piece.entity.names[move.face] + move.piece.id;
 }
 
 solver.calcPositionKey = (positions, turn) => {
