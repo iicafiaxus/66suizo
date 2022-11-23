@@ -101,18 +101,8 @@ solver.reducePositions = (positions, move) => {
 }
 
 solver.calcBestMove = (positions, turn) => {
-	const moves = solver.makePossibleMoves(positions, turn);
-	let bestValue = [-10000, 10000][turn];
-	let bestMove = null;
-	for(let move of moves){
-		const movedPositions = solver.reducePositions(positions, move);
-		const movedValue = solver.evaluateDeep(move, movedPositions, turn, 1);
-		if(turn == 0 && bestValue < movedValue || turn == 1 && bestValue > movedValue){
-			bestValue = movedValue;
-			bestMove = move;
-		}
-	}
-	return { move: bestMove, value: bestValue };
+	const rootItem = solver.evaluateDeep(null, positions, 1 - turn, 2);
+	return { move: rootItem.nextItem?.move ?? null, value: rootItem.value };
 }
 
 // TODO: have multiple parents
@@ -124,17 +114,23 @@ solver.EvaluationItem = function(positions, turn, depth, parent = null, move){
 	this.move = move;
 	this.value = [10000, -10000][turn];
 	this.nextItem = null;
+	this.queue = new Util.PriorityQueue();
 	// TODO: value should have uncertainity range
 }
 solver.EvaluationItem.prototype.update = function(kid){
-	if(this.turn == 0 && kid.value < this.value || this.turn == 1 && kid.value > this.value){
-		this.nextItem = kid;
-		this.setValue(kid.value);
-		if(this.parent) this.parent.update(this);
+	this.queue.push(kid, solver.calcPositionKey(kid.positions, kid.turn),
+		(this.turn == 0 ? (kid.value + 10000) : (10000 - kid.value))
+	);
+	if(this.queue.peek().item.value != this.value){
+		this.nextItem = this.queue.peek().item;
+		if(globalThis.DEBUG) console.log(this.depth, solver.moveToString(this.move), this.value, kid.value, this.turn,
+			this.queue.toArray().map(x => `${solver.moveToString(x.item.move)}(${x.item.value})`));
+		this.setValue(this.nextItem.value);
 	}
 }
 solver.EvaluationItem.prototype.setValue = function(value){
 	this.value = value;
+	if(globalThis.DEBUG) console.log(this.depth, solver.moveToString(this.move), this.value);
 	if(this.parent) this.parent.update(this);
 }
 
@@ -160,7 +156,7 @@ solver.evaluateDeep = (move, positions, turn, depth = 3) => {
 			}
 		}
 	}
-	return rootItem.value;
+	return rootItem;
 }
 
 
