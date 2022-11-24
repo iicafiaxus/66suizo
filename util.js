@@ -90,3 +90,17 @@ Util.Bidi.prototype.toArray = function(){
 	}
 	return array;
 }
+Util.Bidi.prototype.hasItem = function(){
+	return !! this.root;
+}
+Util.Bidi.prototype.find = function(f){
+	let listItem = this.root;
+	while(listItem && ! f(listItem.entry)) listItem = listItem.right;
+	return listItem?.entry;
+}
+Util.Bidi.prototype.findLast = function(f){
+	let listItem = this.root;
+	while(listItem && listItem.right && f(listItem.right.entry)) listItem = listItem.right;
+	return listItem?.entry;
+}
+
