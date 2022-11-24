@@ -112,7 +112,7 @@ solver.EvaluationItem = function(positions, turn, depth, parent = null, move){
 	this.depth = depth;
 	this.parent = parent;
 	this.move = move;
-	this.value = [10000, -10000][turn];
+	this.value = [10001, -10001][turn];
 	this.nextItem = null;
 	this.queue = new Util.PriorityQueue();
 	// TODO: value should have uncertainity range
