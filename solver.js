@@ -139,12 +139,18 @@ solver.EvaluationItem.prototype.setValue = function(value){
 // TODO: prune
 // TODO: pause for time or count
 // TODO: break for time or count
-solver.evaluateDeep = (move, positions, turn, depth = 3) => {
-	const queue = new Util.Queue();
-	const rootItem = new solver.EvaluationItem(positions, turn, depth, null, move);
-	queue.push(rootItem);
-	while(queue.getLength() > 0){
-		const item = queue.pop();
+solver.initEvaluation = (callback, positions, turn, depth = 3) => {
+	const rootItem = new solver.EvaluationItem(positions, turn, depth, null, null);
+	solver.queue = new Util.Queue();
+	solver.queue.push(rootItem);
+	solver.rootItem = rootItem;
+	solver.callback = callback;
+	solver.evaluateFromQueue();
+}
+solver.evaluateFromQueue = () => {
+	let count = 0;
+	while(solver.queue.getLength() > 0 && ++count < 100){
+		const item = solver.queue.pop();
 		if(item.depth == 0){
 			item.setValue(solver.evaluate(item.positions));
 		}
@@ -152,11 +158,12 @@ solver.evaluateDeep = (move, positions, turn, depth = 3) => {
 			const moves = solver.makePossibleMoves(item.positions, 1 - item.turn);
 			for(let move of moves){
 				const movedPositions = solver.reducePositions(item.positions, move);
-				queue.push(new solver.EvaluationItem(movedPositions, 1 - item.turn, item.depth - 1, item, move));
+				solver.queue.push(new solver.EvaluationItem(movedPositions, 1 - item.turn, item.depth - 1, item, move));
 			}
 		}
 	}
-	return rootItem;
+	const more = solver.callback(solver.rootItem?.nextItem, solver.queue.getLength());
+	if(solver.queue.getLength() > 0 && more) setTimeout(solver.evaluateFromQueue, 0);
 }
 
 
@@ -174,10 +181,16 @@ solver.evaluate = (positions) => {
 }
 
 solver.solve = (positions, turn, onFound) => {
-	solver.evaluationCounter = 0;
-	const bestMove = solver.calcBestMove(positions, turn).move;
-	console.log("solver found", solver.moveToString(bestMove), "out of", solver.evaluationCounter);
-	onFound(bestMove);
+	console.log("考えています...");
+	solver.initEvaluation(
+		(item, length) => {
+			console.log(solver.moveToString(item?.move), length);
+			if(length == 0) onFound(item?.move);
+			else return true;
+			return false;
+		},
+		positions, 1 - turn, 2
+	);
 }
 
 solver.cellToString = (cell) => {
