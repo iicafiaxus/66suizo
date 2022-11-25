@@ -44,10 +44,13 @@ solver.scanMoves = (positions, player) => {
 		}
 	}
 
+	const isUsed = [];
 	for(let piece of model.pieces){
 		if(positions[piece.id].player != player) continue;
 		if(positions[piece.id].isExcluded) continue;
 		if(positions[piece.id].isOut){
+			if(isUsed[piece.entity.id]) continue;
+			isUsed[piece.entity.id] = true;
 			for(let cell of model.cells){
 				if(occupiers[cell.id] >= 0) continue;
 				if(player == 0 && cell.x < piece.entity.forcePromotion) continue;
