@@ -39,6 +39,7 @@ const Game = function(props){
 		if( ! isRunning) return;
 		const winner = model.checkWinner(positions);
 		if(winner){
+			setIsRunning(false);
 			setAlert({
 				title: "",
 				message: ["先手", "後手"][winner.player] + "の勝ちです。",
@@ -46,7 +47,6 @@ const Game = function(props){
 					{ caption: "OK", onClick: stop },
 				]
 			});
-			setIsRunning(false);
 		}
 	};
 
@@ -94,7 +94,7 @@ const Game = function(props){
 	};
 
 	const handleAiMove = (m) => { // m: move object
-		if(m) moveWithFace(m.piece, m.cell, m.face);
+		if(isRunning && m) moveWithFace(m.piece, m.cell, m.face);
 		else setIsRunning(false); // no possible move
 	}
 
@@ -115,10 +115,17 @@ const Game = function(props){
 		setIsAfterMove(false);
 		checkWinner();
 		if( ! isRunning) return;
-		if(model.useAi[turn]){
-			solver.solve(positions, turn, handleAiMove);
-		}
+		if(model.useAi[turn]) setIsCallingAi(true);
 	}, [isRunning, isAfterMove, positions, turn]);
+
+	const [isCallingAi, setIsCallingAi] = React.useState(false);
+	React.useEffect(() => {
+		if( ! isCallingAi) return;
+		setIsCallingAi(false);
+		if( ! isRunning) return;
+		solver.solve(positions, turn, handleAiMove);
+	}, [isCallingAi, isRunning]);
+
 
 	return (
 		<div>
