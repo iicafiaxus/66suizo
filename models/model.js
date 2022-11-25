@@ -44,7 +44,7 @@ model.checkCanMove = (piece, cell, positions) => {
 		if(piece.entity.occupiesColumn){
 			if(model.pieces.find(p => 
 				positions[p.id].y == cell.y && positions[p.id].player == player &&
-				p.entity == piece.entity
+				p.entity == piece.entity && positions[p.id].face == 0
 			)) return false;
 		}
 		return true;
