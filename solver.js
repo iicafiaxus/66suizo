@@ -46,6 +46,7 @@ solver.scanMoves = (positions, player) => {
 
 	for(let piece of model.pieces){
 		if(positions[piece.id].player != player) continue;
+		if(positions[piece.id].isExcluded) continue;
 		if(positions[piece.id].isOut){
 			for(let cell of model.cells){
 				if(occupiers[cell.id] >= 0) continue;
