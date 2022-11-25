@@ -32,8 +32,10 @@ for(let player of [0, 1]){
 
 // TODO: complexity concern
 // TODO: position should point cell object
-solver.makePossibleMoves = (positions, player) => {
+solver.scanMoves = (positions, player) => {
 	const moves = [];
+	const counts = [];
+	for(let cell of model.cells) counts[cell.id] = 0;
 
 	const occupiers = [];
 	for(let cell of model.cells)for (pos of positions){
@@ -59,9 +61,11 @@ solver.makePossibleMoves = (positions, player) => {
 			}
 		}
 		else{
-			const lines = solver.lines[player][piece.id][positions[piece.id].face][positions[piece.id].x][positions[piece.id].y];
+			const lines = solver.lines[player][piece.id][
+				positions[piece.id].face][positions[piece.id].x][positions[piece.id].y];
 			for(let line of lines){
 				for(let cell of line){
+					counts[cell.id] += 1;
 					if(occupiers[cell.id] == player) break;
 					const promo = model.checkPromotion(piece, cell, positions);
 					if(promo[1]) moves.push({ piece, cell, face: 1 });
@@ -72,7 +76,7 @@ solver.makePossibleMoves = (positions, player) => {
 		}
 	}
 
-	return moves;
+	return { moves, counts };
 }
 
 // TODO: Integrate with Game.move
@@ -149,13 +153,13 @@ solver.initEvaluation = (callback, positions, turn, depth = 3) => {
 }
 solver.evaluateFromQueue = () => {
 	let count = 0;
-	while(solver.queue.getLength() > 0 && ++count < 100){
+	while(solver.queue.getLength() > 0 && ++count < 200){
 		const item = solver.queue.pop();
 		if(item.depth == 0){
 			item.setValue(solver.evaluate(item.positions));
 		}
 		else{
-			const moves = solver.makePossibleMoves(item.positions, 1 - item.turn);
+			const moves = solver.scanMoves(item.positions, 1 - item.turn).moves;
 			for(let move of moves){
 				const movedPositions = solver.reducePositions(item.positions, move);
 				solver.queue.push(new solver.EvaluationItem(movedPositions, 1 - item.turn, item.depth - 1, item, move));
@@ -175,21 +179,34 @@ solver.evaluate = (positions) => {
 	if(winner){
 		if(winner.player == 0) return 10000; else return -10000;
 	}
-	const moveCounts = [0, 1].map(t => solver.makePossibleMoves(positions, t).length);
+	const scan0 = solver.scanMoves(positions, 0);
+	const scan1 = solver.scanMoves(positions, 1);
+
+	let value = (scan0.moves.length - scan1.moves.length) * 50;
+	for(let c of model.cells){
+		if(scan0.counts[c.id] > scan1.counts[c.id]) value += 100;
+		else if(scan0.counts[c.id] < scan1.counts[c.id]) value -= 100;
+	}
 	solver.evaluationCounter += 1;
-	return (moveCounts[0] - moveCounts[1]) * 100;
+	return value;
 }
 
 solver.solve = (positions, turn, onFound) => {
 	console.log("考えています...");
 	solver.initEvaluation(
 		(item, length) => {
-			console.log(solver.moveToString(item?.move), length);
+			let bestMoveString = "";
+			for(let c = item; c && c.move; c = c.nextItem){
+				bestMoveString += " " + solver.moveToString(c.move);
+			}
+			console.log(bestMoveString, length);
 			if(length == 0) onFound(item?.move);
 			else return true;
 			return false;
 		},
-		positions, 1 - turn, 2
+		positions,
+		1 - turn,
+		2
 	);
 }
 
