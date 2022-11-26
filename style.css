@@ -210,6 +210,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	font-size: 36px; 
 	margin: 4px 8px; 
 	cursor: pointer;
+	user-select: none;
 }
 .modal-main button.primaryButton{
 	min-height: 200px;
