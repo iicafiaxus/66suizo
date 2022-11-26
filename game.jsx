@@ -23,6 +23,7 @@ const Game = function(props){
 		setIsRunning(true);
 		setIsInitial(false);
 		model.clocks[turn].start();
+		setIsAfterMove(true);
 	}
 	const stop = () => {
 		model.clocks[turn].stop();
@@ -51,13 +52,20 @@ const Game = function(props){
 	const openMenu = () => {
 		if(isInitial) setAlert({
 			options: [
-				{ caption: "対局開始", onClick: start, isPrimary: true },
+				{ caption: "一局よろしくお願いします", onClick: start, isPrimary: true },
 				{ caption: "あとで", onClick: () => void 0 },
+			]
+		});
+		else if( ! isRunning) setAlert({
+			options: [
+				{ caption: "続きから指しましょう", onClick: start },
+				{ caption: "駒を並べ直しましょう", onClick: () => setIsInitial(true) },
 			]
 		});
 		else setAlert({
 			options: [
-				{ caption: "初手まで戻す", onClick: () => setIsInitial(true) }
+				{ caption: "負けました（投了）", onClick: resign },
+				{ caption: "中断しましょう", onClick: stop }
 			]
 		});
 	}
@@ -76,6 +84,17 @@ const Game = function(props){
 			});
 		}
 	};
+
+	const resign = () => {
+		setIsRunning(false);
+		setAlert({
+			title: "",
+			message: "投了しました。" + ["先手", "後手"][1 - turn] + "の勝ちです。",
+			options: [
+				{ caption: "OK", onClick: stop },
+			]
+		});
+	}
 
 	const move = (piece, cell) => {
 		if( ! model.checkCanMove(piece, cell, positions)) return;
