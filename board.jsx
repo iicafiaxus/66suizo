@@ -75,6 +75,7 @@ const Board = function(props){
 					<Cell
 						cell={cell}
 						key={cell.x + "/" + cell.y}
+						isLastCell={ ! floating && props.lastMove?.cell?.id == cell.id}
 						canAccept={floating && props.checkCanMove(floating, cell)}
 						onClick={handleCellClick}
 					>

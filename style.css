@@ -88,7 +88,10 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	.cell.accepting:hover, .piece.floating{
 		outline: 2px dashed #600d;
 	}
-	.cell.accepting:hover{
+	.cell.last-move-cell{
+		outline: 2px dashed #999d;
+	}
+	.cell.accepting:hover, .cell.last-move-cell{
 		outline-offset: -8px;
 	}
 	.piece.floating{
@@ -99,7 +102,10 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	.cell.accepting, .piece.floating{
 		outline: 2px dashed #600d;
 	}
-	.cell.accepting{
+	.cell.last-move-cell{
+		outline: 2px dashed #999d;
+	}
+	.cell.accepting, .cell.last-move-cell{
 		outline-offset: -8px;
 	}
 	.piece.floating{

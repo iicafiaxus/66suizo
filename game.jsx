@@ -16,6 +16,8 @@ const Game = function(props){
 
 	const [turn, setTurn] = React.useState(model.turn);
 
+	const [lastMove, setLastMove] = React.useState(null);
+
 	const [isRunning, setIsRunning] = React.useState(false);
 	const start = () => {
 		setIsRunning(true);
@@ -33,6 +35,7 @@ const Game = function(props){
 	const init = () => {
 		for(let p of pieces) setPositions[p.id](p.position);
 		setTurn(model.turn);
+		setLastMove(null);
 		setIsRunning(false);
 		for(let turn of [0, 1]){
 			model.clocks[turn].stop();
@@ -102,6 +105,7 @@ const Game = function(props){
 		model.clocks[turn].stop();
 		model.clocks[1 - turn].start();
 		setTurn(1 - turn);
+		setLastMove({ piece, cell, face });
 		setIsAfterMove(true);
 	};
 	const moveToKomadai = (piece, player) => {
@@ -160,6 +164,7 @@ const Game = function(props){
 				times={times}
 				positions={pieces.map(p => positions[p.id])}
 				turn={turn}
+				lastMove={lastMove}
 				isRunning={isRunning}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
 				checkIsPickable={(piece) => isRunning && model.checkIsPickable(piece, positions, turn)}
