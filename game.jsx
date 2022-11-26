@@ -19,6 +19,7 @@ const Game = function(props){
 	const [isRunning, setIsRunning] = React.useState(false);
 	const start = () => {
 		setIsRunning(true);
+		setIsInitial(false);
 		model.clocks[turn].start();
 	}
 	const stop = () => {
@@ -26,14 +27,37 @@ const Game = function(props){
 		setIsRunning(false);
 	}
 
-	const [alert, setAlert] = React.useState({
-		title: "",
-		message: "",
-		options: [
-			{ caption: "対局開始", onClick: start, isPrimary: true },
-			{ caption: "あとで", onClick: stop },
-		]
-	});
+	const [alert, setAlert] = React.useState(null);
+
+	const [isInitial, setIsInitial] = React.useState(true);
+	const init = () => {
+		for(let p of pieces) setPositions[p.id](p.position);
+		setTurn(model.turn);
+		setIsRunning(false);
+		for(let turn of [0, 1]){
+			model.clocks[turn].stop();
+			model.clocks[turn].reset();
+			setTimes([0, 0]);
+		}
+		openMenu();
+	}
+	React.useEffect(() => {
+		if(isInitial) init();
+	}, [isInitial]);
+
+	const openMenu = () => {
+		if(isInitial) setAlert({
+			options: [
+				{ caption: "対局開始", onClick: start, isPrimary: true },
+				{ caption: "あとで", onClick: () => void 0 },
+			]
+		});
+		else setAlert({
+			options: [
+				{ caption: "初手まで戻す", onClick: () => setIsInitial(true) }
+			]
+		});
+	}
 
 	const checkWinner = () => {
 		if( ! isRunning) return;
@@ -140,6 +164,7 @@ const Game = function(props){
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
 				checkIsPickable={(piece) => isRunning && model.checkIsPickable(piece, positions, turn)}
 				move={move}
+				openMenu={openMenu}
 			/>
 
 			{alert && <Modal onClose={() => setAlert(null)}>

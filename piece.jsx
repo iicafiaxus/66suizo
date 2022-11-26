@@ -8,7 +8,7 @@ const Piece = function(props){
 			(props.isFloating ? " floating" : ""),
 			(props.isPickable ? " pickable" : "")
 		].join(" ")}
-		onClick={() => props.onClick(props.piece)}
+		onClick={(ev) => (props.onClick(ev, props.piece))}
 	>
 		{props.piece.entity.names[props.position.face]}
 	</div>

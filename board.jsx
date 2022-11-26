@@ -6,20 +6,25 @@
 const Board = function(props){
 	const [floating, setFloating] = React.useState(null);
 
-	const handlePieceClick = (piece) => {
+	const handlePieceClick = (event, piece) => {
 		if(floating) return;
 		if( ! props.checkIsPickable(piece)) return;
 		setFloating(piece);
+		event.stopPropagation();
 	}
 
 	const handleCellClick = (cell) => {
-		if( ! floating) return;
-		props.move(floating, cell);
-		setFloating(null);
+		if(floating){
+			props.move(floating, cell);
+			setFloating(null);
+		}
+		else props.openMenu();
 	}
 	const handleKomadaiClick = (cell) => {
-		if( ! floating) return;
-		setFloating(null);
+		if(floating){
+			setFloating(null);
+		}
+		else props.openMenu();
 	}
 	const getCellPieces = (cell) => props.pieces.filter(p =>
 		! props.positions[p.id].isOut && props.positions[p.id].x == cell.x && props.positions[p.id].y == cell.y
