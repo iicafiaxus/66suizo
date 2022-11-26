@@ -142,7 +142,7 @@ const Game = function(props){
 
 	const handleAiMove = (m) => { // m: move object
 		if(isRunning && m) moveWithFace(m.piece, m.cell, m.face);
-		else setIsRunning(false); // no possible move
+		else resign(); // no possible move
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);

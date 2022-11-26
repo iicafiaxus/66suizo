@@ -204,7 +204,12 @@ solver.solve = (positions, turn, onFound) => {
 				bestMoveString += " " + solver.moveToString(c.move);
 			}
 			console.log(bestMoveString, length);
-			if(length == 0) onFound(item?.move);
+			if(length == 0){
+				if(item?.move && (item.turn == 0 && item.value > -5000 || item.turn == 1 && item.value < 5000)){
+					onFound(item.move);
+				}
+				else onFound(null);
+			}
 			else return true;
 			return false;
 		},
