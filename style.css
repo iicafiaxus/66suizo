@@ -181,12 +181,14 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .modal-back {
 	position: absolute; width: 100%; height: 100%; z-index: 1103;
-	background: #000c; cursor: pointer;
+	background: #5557; cursor: pointer;
 }
 .modal-main {
  	position: absolute; z-index: 1105;
-	background: #fffc; border-radius: 4px; border: 2px solid #ffff;
-	max-width: 90vw; max-height: 90vh; min-width: 50vw; min-height: min(30vw, 50vh);
+	background: #ffff; border-radius: 8px; border: 2px solid #ffff;
+	box-shadow: #000c 0px 0px 20px 0px; 
+	max-width: 90vw; max-height: 90vh;
+	min-width: 50vw; min-height: min(30vw, 50vh);
 	left: 50%; top: 40%; transform: translate(-50%, -40%);
 	display: flex; flex-direction: column; justify-content: center;
 }
@@ -195,8 +197,10 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	padding: 8px; 
 }
 .modal-body {
-	padding: 16px;
-	display: flex; flex-direction: column; justify-content: center;
+	padding: 16px 48px;
+	width: max-content; margin: auto; 
+	display: flex; flex-direction: column; justify-content: space-around;
+	flex-grow: 1;
 }
 
 .modal-main *{
@@ -208,7 +212,8 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .modal-main button{
 	min-height: 80px; 
 	font-size: 36px; 
-	margin: 4px 8px; 
+	margin: 16px 8px; 
+	padding: 0 24px;
 	cursor: pointer;
 	user-select: none;
 }
