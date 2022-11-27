@@ -16,6 +16,14 @@ Util.Queue.prototype.pop = function(){
 Util.Queue.prototype.peek = function(){
 	return this.array[this.index];
 }
+Util.Queue.prototype.popStack = function(){
+	const res = this.array[this.array.length - 1];
+	this.array.length --;
+	return res;
+}
+Util.Queue.prototype.peekStack = function(){
+	return this.array[this.array.length - 1];
+}
 Util.Queue.prototype.getLength = function(){
 	return this.array.length - this.index;
 }
