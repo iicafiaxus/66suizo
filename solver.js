@@ -30,6 +30,16 @@ for(let player of [0, 1]){
 	}
 }
 
+solver.calcOccupiers = (positions) => {
+	const occupiers = [];
+	for(let cell of model.cells)for (pos of positions){
+		if(pos.x == cell.x && pos.y == cell.y){
+			occupiers[cell.id] = pos.player;
+		}
+	}
+	return occupiers;
+}
+
 // TODO: complexity concern
 // TODO: position should point cell object
 solver.scanMoves = (positions, player) => {
@@ -37,12 +47,7 @@ solver.scanMoves = (positions, player) => {
 	const counts = [];
 	for(let cell of model.cells) counts[cell.id] = 0;
 
-	const occupiers = [];
-	for(let cell of model.cells)for (pos of positions){
-		if(pos.x == cell.x && pos.y == cell.y){
-			occupiers[cell.id] = pos.player;
-		}
-	}
+	const occupiers = solver.calcOccupiers(positions);
 
 	const isUsed = [];
 	for(let piece of model.pieces){
@@ -126,20 +131,30 @@ solver.EvaluationItem = function(positions, turn, depth, parent = null, move){
 	// TODO: value should have uncertainity range
 }
 solver.EvaluationItem.prototype.update = function(kid){
+	if( ! this.parent && globalThis.DEBUG) console.log(solver.makeLineString(kid), "(" + kid.value + ")");
 	this.queue.push(kid, solver.calcPositionKey(kid.positions, kid.turn),
 		(this.turn == 0 ? (kid.value + 10000) : (10000 - kid.value))
 	);
 	if(this.queue.peek().item.value != this.value){
 		this.nextItem = this.queue.peek().item;
-		if(globalThis.DEBUG) console.log(this.depth, solver.moveToString(this.move), this.value, kid.value, this.turn,
-			this.queue.toArray().map(x => `${solver.moveToString(x.item.move)}(${x.item.value})`));
 		this.setValue(this.nextItem.value);
 	}
 }
 solver.EvaluationItem.prototype.setValue = function(value){
 	this.value = value;
-	if(globalThis.DEBUG) console.log(this.depth, solver.moveToString(this.move), this.value);
 	if(this.parent) this.parent.update(this);
+	else if(globalThis.DEBUG){
+		const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
+		console.log("【最善手】", bestMoveString, "(" + solver.rootItem?.value + ")");
+	}
+}
+
+solver.makeLineString = (item) => {
+	let s = "";
+	for(let c = item; c && c.move; c = c.nextItem){
+		s += " " + solver.moveToString(c.move);
+	}
+	return s;
 }
 
 
@@ -157,21 +172,91 @@ solver.initEvaluation = (callback, positions, turn, depth = 3) => {
 }
 solver.evaluateFromQueue = () => {
 	let count = 0;
-	while(solver.queue.getLength() > 0 && ++count < 200){
+	while(solver.queue.getLength() > 0 && ++count < 500){
 		const item = solver.queue.pop();
 		if(item.depth == 0){
 			item.setValue(solver.evaluate(item.positions));
 		}
 		else{
 			const moves = solver.scanMoves(item.positions, 1 - item.turn).moves;
-			for(let move of moves){
-				const movedPositions = solver.reducePositions(item.positions, move);
-				solver.queue.push(new solver.EvaluationItem(movedPositions, 1 - item.turn, item.depth - 1, item, move));
+			count += moves.length;
+			let xs = moves.map(move => {
+				const newPositions = solver.reducePositions(item.positions, move);
+				const likeliness = solver.calcLikeliness(item.positions, move, newPositions);
+				return { move, newPositions, likeliness };				
+			});
+			if(solver.queue.getLength() > 4000){
+				xs = xs.filter(x => x.likeliness * item.depth >= 200);
+			}
+			if(xs.length == 0){
+				item.setValue(solver.evaluate(item.positions));
+			}
+			else{
+				xs.sort((a, b) => b.likeliness - a.likeliness);
+				for(let x of xs){
+					solver.queue.push(new solver.EvaluationItem(x.newPositions, 1 - item.turn, item.depth - 1, item, x.move));
+				}
 			}
 		}
 	}
 	const more = solver.callback(solver.rootItem?.nextItem, solver.queue.getLength());
 	if(solver.queue.getLength() > 0 && more) setTimeout(solver.evaluateFromQueue, 0);
+}
+
+solver.worthiness = [
+	7, // king
+	7, // queen
+	3, // rook
+	3, // bishop
+	3, // silver
+	1, // pawn
+];
+
+solver.calcLikeliness = (positions, move, newPositions) => {
+	let likeliness = 0;
+	const turn = positions[move.piece.id].player;
+
+	// capture something
+	for(let p of model.pieces){
+		if(positions[p.id].player == 1 - turn && newPositions[p.id].player == turn){
+			likeliness += 100 * solver.worthiness[p.entity.id];
+		}
+	}
+
+	// TODO: do not calc every time
+	const scans = [0, 1].map(turn => solver.scanMoves(positions, turn));
+	const newScans = [0, 1].map(turn => solver.scanMoves(newPositions, turn));
+	const occupiers = solver.calcOccupiers(positions);
+	const newOccupiers = solver.calcOccupiers(newPositions);
+
+	for(let cell of model.cells){
+
+		// remove opponent domination
+		if(
+			scans[turn].counts[cell.id] < scans[1 - turn].counts[cell.id] &&
+			positions[occupiers[cell.id]?.id]?.player == turn
+		){
+			if(
+				newScans[turn].counts[cell.id] >= newScans[1 - turn].counts[cell.id] ||
+				newOccupiers[cell.id].id != occupiers[cell.id].id
+			){
+				likeliness += 50 * solver.worthiness[p.entity.id];
+			}
+		}
+
+		// make domination
+		if(
+			newScans[turn].counts[cell.id] > newScans[1 - turn].counts[cell.id] &&
+			newPositions[occupiers[cell.id]?.id]?.player == 1 - turn
+		){
+			if(scans[turn].counts[cell.id] >= scans[1 - turn].counts[cell.id]){
+				likeliness += 25 * solver.worthiness[p.entity.id];
+			}
+		}
+	}
+
+	return likeliness;
+
 }
 
 
@@ -186,11 +271,17 @@ solver.evaluate = (positions) => {
 	const scan0 = solver.scanMoves(positions, 0);
 	const scan1 = solver.scanMoves(positions, 1);
 
-	let value = (scan0.moves.length - scan1.moves.length) * 50;
+	let value = 0;
 	for(let c of model.cells){
 		if(scan0.counts[c.id] > scan1.counts[c.id]) value += 100;
-		else if(scan0.counts[c.id] < scan1.counts[c.id]) value -= 100;
+		else if(scan0.counts[c.id] < scan1.counts[c.id]) value -= 100.;
 	}
+	for(let p of model.pieces){
+		if(positions[p.id].isExcluded) continue;
+		if(positions[p.id].player == 0) value += 100 * solver.worthiness[p.entity.id];
+		else value -= 100 * solver.worthiness[p.entity.id];
+	}
+
 	solver.evaluationCounter += 1;
 	return value;
 }
@@ -199,12 +290,9 @@ solver.solve = (positions, turn, onFound) => {
 	console.log("考えています...");
 	solver.initEvaluation(
 		(item, length) => {
-			let bestMoveString = "";
-			for(let c = item; c && c.move; c = c.nextItem){
-				bestMoveString += " " + solver.moveToString(c.move);
-			}
-			console.log(bestMoveString, length);
 			if(length == 0){
+				const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
+				console.log(bestMoveString, "(" + solver.rootItem?.value + ")");
 				if(item?.move && (item.turn == 0 && item.value > -5000 || item.turn == 1 && item.value < 5000)){
 					onFound(item.move);
 				}
@@ -215,7 +303,7 @@ solver.solve = (positions, turn, onFound) => {
 		},
 		positions,
 		1 - turn,
-		2
+		4
 	);
 }
 
