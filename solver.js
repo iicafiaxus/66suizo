@@ -173,8 +173,13 @@ solver.initEvaluation = (callback, positions, turn, depth = 3) => {
 solver.evaluateFromQueue = () => {
 	let count = 0;
 	while(solver.queue.getLength() > 0 && ++count < 500){
-		const item = solver.queue.pop();
-		if(item.depth == 0){
+		const item = solver.queue.popStack();
+		if(item.parent && item.parent.parent){
+			// pruning; note: this works only when using stack.
+			if(item.turn == 0 && item.parent.value >= item.parent.parent.value) continue;
+			if(item.turn == 1 && item.parent.value <= item.parent.parent.value) continue;
+		}
+		if(item.depth == 0 || model.checkWinner(item.positions)){
 			item.setValue(solver.evaluate(item.positions));
 		}
 		else{
@@ -192,7 +197,7 @@ solver.evaluateFromQueue = () => {
 				item.setValue(solver.evaluate(item.positions));
 			}
 			else{
-				xs.sort((a, b) => b.likeliness - a.likeliness);
+				xs.sort((a, b) => a.likeliness - b.likeliness); // because now it is stack
 				for(let x of xs){
 					solver.queue.push(new solver.EvaluationItem(x.newPositions, 1 - item.turn, item.depth - 1, item, x.move));
 				}
