@@ -127,6 +127,7 @@ solver.EvaluationItem = function(positions, turn, depth, parent = null, move){
 	this.move = move;
 	this.value = [10001, -10001][turn];
 	this.nextItem = null;
+	this.waitCount = 0;
 	this.queue = new Util.PriorityQueue();
 	// TODO: value should have uncertainity range
 }
@@ -136,18 +137,30 @@ solver.EvaluationItem.prototype.update = function(kid){
 		(this.turn == 0 ? (kid.value + 10000) : (10000 - kid.value))
 	);
 	if(this.queue.peek().item.value != this.value){
+		if(this.nextItem == kid && this.queue.peek().item != kid){
+			this.killerMove = kid.nextItem?.move;
+			if( ! this.parent && globalThis.DEBUG) console.log("!", solver.moveToString(this.killerMove, this.turn));
+		}
 		this.nextItem = this.queue.peek().item;
 		this.setValue(this.nextItem.value);
 	}
 }
 solver.EvaluationItem.prototype.setValue = function(value){
 	this.value = value;
-	if(this.parent) this.parent.update(this);
-	else if(globalThis.DEBUG){
+	if(this.parent && this.waitCount == 0) this.parent.update(this);
+	if( ! this.parent && globalThis.DEBUG){
 		const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
 		console.log("【最善手】", bestMoveString, "(" + solver.rootItem?.value + ")");
 	}
 }
+solver.EvaluationItem.prototype.addWait = function(){
+	this.waitCount += 1;
+}
+solver.EvaluationItem.prototype.removeWait = function(){
+	this.waitCount -= 1;
+	if(this.waitCount == 0 && this.parent) this.parent.update(this);
+}
+
 
 solver.makeLineString = (item) => {
 	let s = "";
@@ -174,10 +187,15 @@ solver.evaluateFromQueue = () => {
 	let count = 0;
 	while(solver.queue.getLength() > 0 && ++count < 500){
 		const item = solver.queue.popStack();
+		if(item.parent) item.parent.removeWait();
 		if(item.parent && item.parent.parent){
 			// pruning; note: this works only when using stack.
-			if(item.turn == 0 && item.parent.value >= item.parent.parent.value) continue;
-			if(item.turn == 1 && item.parent.value <= item.parent.parent.value) continue;
+			if(
+				item.turn == 0 && (item.parent.value >= 10000 || item.parent.value > item.parent.parent.value) ||
+				item.turn == 1 && (item.parent.value <= -10000 || item.parent.value < item.parent.parent.value)
+			){
+				continue;
+			}
 		}
 		if(item.depth == 0 || model.checkWinner(item.positions)){
 			item.setValue(solver.evaluate(item.positions));
@@ -190,6 +208,8 @@ solver.evaluateFromQueue = () => {
 				const likeliness = solver.calcLikeliness(item.positions, move, newPositions);
 				return { move, newPositions, likeliness };				
 			});
+			const killerMove = item.parent?.parent?.killerMove;
+			const killer = xs.find(x => x.move.piece.id == killerMove?.piece?.id && x.move.cell.id == killerMove?.cell?.id);
 			if(solver.queue.getLength() > 4000){
 				xs = xs.filter(x => x.likeliness * item.depth >= 200);
 			}
@@ -200,6 +220,11 @@ solver.evaluateFromQueue = () => {
 				xs.sort((a, b) => a.likeliness - b.likeliness); // because now it is stack
 				for(let x of xs){
 					solver.queue.push(new solver.EvaluationItem(x.newPositions, 1 - item.turn, item.depth - 1, item, x.move));
+					item.addWait();
+				}
+				if(killer){
+					solver.queue.push(new solver.EvaluationItem(killer.newPositions, 1 - item.turn, item.depth - 1, item, killer.move));
+					item.waitCount += 1;
 				}
 			}
 		}
@@ -283,8 +308,8 @@ solver.evaluate = (positions) => {
 	}
 	for(let p of model.pieces){
 		if(positions[p.id].isExcluded) continue;
-		if(positions[p.id].player == 0) value += 100 * solver.worthiness[p.entity.id];
-		else value -= 100 * solver.worthiness[p.entity.id];
+		if(positions[p.id].player == 0) value += 100 * solver.worthiness[p.entity.id][positions[p.id].face];
+		else value -= 100 * solver.worthiness[p.entity.id][positions[p.id].face];
 	}
 
 	solver.evaluationCounter += 1;
