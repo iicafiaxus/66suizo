@@ -209,12 +209,12 @@ solver.evaluateFromQueue = () => {
 }
 
 solver.worthiness = [
-	7, // king
-	7, // queen
-	3, // rook
-	3, // bishop
-	3, // silver
-	1, // pawn
+	[10, 0], // king
+	[8, 10], // queen
+	[4, 6], // rook
+	[4, 6], // bishop
+	[3, 4], // silver
+	[1, 4], // pawn
 ];
 
 solver.calcLikeliness = (positions, move, newPositions) => {
@@ -224,7 +224,7 @@ solver.calcLikeliness = (positions, move, newPositions) => {
 	// capture something
 	for(let p of model.pieces){
 		if(positions[p.id].player == 1 - turn && newPositions[p.id].player == turn){
-			likeliness += 100 * solver.worthiness[p.entity.id];
+			likeliness += 100 * solver.worthiness[p.entity.id][positions[p.id].face];
 		}
 	}
 
@@ -245,7 +245,7 @@ solver.calcLikeliness = (positions, move, newPositions) => {
 				newScans[turn].counts[cell.id] >= newScans[1 - turn].counts[cell.id] ||
 				newOccupiers[cell.id].id != occupiers[cell.id].id
 			){
-				likeliness += 50 * solver.worthiness[p.entity.id];
+				likeliness += 50 * solver.worthiness[p.entity.id][positions[p.id].face];
 			}
 		}
 
@@ -255,7 +255,7 @@ solver.calcLikeliness = (positions, move, newPositions) => {
 			newPositions[occupiers[cell.id]?.id]?.player == 1 - turn
 		){
 			if(scans[turn].counts[cell.id] >= scans[1 - turn].counts[cell.id]){
-				likeliness += 25 * solver.worthiness[p.entity.id];
+				likeliness += 25 * solver.worthiness[p.entity.id][positions[p.id].face];
 			}
 		}
 	}
