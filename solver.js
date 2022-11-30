@@ -264,11 +264,11 @@ solver.calcLikeliness = (positions, move, newPositions) => {
 		// remove opponent domination
 		if(
 			scans[turn].counts[cell.id] < scans[1 - turn].counts[cell.id] &&
-			positions[occupiers[cell.id]?.id]?.player == turn
+			occupiers[cell.id] === turn
 		){
 			if(
 				newScans[turn].counts[cell.id] >= newScans[1 - turn].counts[cell.id] ||
-				newOccupiers[cell.id].id != occupiers[cell.id].id
+				occupiers[cell.id] !== turn
 			){
 				likeliness += 50 * solver.worthiness[p.entity.id][positions[p.id].face];
 			}
@@ -277,7 +277,7 @@ solver.calcLikeliness = (positions, move, newPositions) => {
 		// make domination
 		if(
 			newScans[turn].counts[cell.id] > newScans[1 - turn].counts[cell.id] &&
-			newPositions[occupiers[cell.id]?.id]?.player == 1 - turn
+			newOccupiers === 1 - turn
 		){
 			if(scans[turn].counts[cell.id] >= scans[1 - turn].counts[cell.id]){
 				likeliness += 25 * solver.worthiness[p.entity.id][positions[p.id].face];
