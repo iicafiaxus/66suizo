@@ -27,6 +27,7 @@ const Game = function(props){
 	}
 	const stop = () => {
 		model.clocks[turn].stop();
+		solver.cancel();
 		setIsRunning(false);
 	}
 
@@ -64,7 +65,7 @@ const Game = function(props){
 		});
 		else setAlert({
 			options: [
-				{ caption: "負けました（投了）", onClick: resign },
+				! model.useAi[turn] && { caption: "負けました（投了）", onClick: resign },
 				{ caption: "中断しましょう", onClick: stop }
 			]
 		});
@@ -186,7 +187,9 @@ const Game = function(props){
 				lastMove={lastMove}
 				isRunning={isRunning}
 				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
-				checkIsPickable={(piece) => isRunning && model.checkIsPickable(piece, positions, turn)}
+				checkIsPickable={(piece) =>
+					isRunning && ! model.useAi[turn] && model.checkIsPickable(piece, positions, turn)
+				}
 				move={move}
 				openMenu={openMenu}
 			/>
@@ -196,7 +199,7 @@ const Game = function(props){
 				<div className="modal-body">
 					{alert.message && <div className="alert-message">{alert.message}</div>}
 					{alert.options.map(opt => 
-						<button
+						opt && <button
 							className={opt.isPrimary ? "primaryButton" : ""}
 							onClick={() => {setAlert(null); opt.onClick()}}
 							key={opt.caption}

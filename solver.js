@@ -316,10 +316,13 @@ solver.evaluate = (positions) => {
 	return value;
 }
 
+solver.isWorking = false;
 solver.solve = (positions, turn, onFound) => {
-	console.log("考えています...");
+	console.log("考えています…");
+	solver.isWorking = true;
 	solver.initEvaluation(
 		(item, length) => {
+			if( ! solver.isWorking) return false;
 			if(length == 0){
 				const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
 				console.log(bestMoveString, "(" + solver.rootItem?.value + ")");
@@ -335,6 +338,10 @@ solver.solve = (positions, turn, onFound) => {
 		1 - turn,
 		4
 	);
+}
+solver.cancel = () => {
+	console.log("中断しました。");
+	solver.isWorking = false;
 }
 
 solver.cellToString = (cell) => {
