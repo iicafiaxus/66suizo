@@ -22,6 +22,7 @@ const Game = function(props){
 	const start = () => {
 		setIsRunning(true);
 		setIsInitial(false);
+		console.log("start", {turn});
 		model.clocks[turn].start();
 		setIsAfterMove(true);
 	}
@@ -39,11 +40,11 @@ const Game = function(props){
 		setTurn(model.turn);
 		setLastMove(null);
 		setIsRunning(false);
-		for(let turn of [0, 1]){
-			model.clocks[turn].stop();
-			model.clocks[turn].reset();
-			setTimes([0, 0]);
+		for(let clock of model.clocks){
+			clock.stop();
+			clock.reset();
 		}
+		setTimes([0, 0]);
 		openMenu();
 	}
 	React.useEffect(() => {
@@ -60,7 +61,7 @@ const Game = function(props){
 		else if( ! isRunning) setAlert({
 			options: [
 				{ caption: "続きから指しましょう", onClick: start },
-				{ caption: "駒を並べ直しましょう", onClick: () => setIsInitial(true) },
+				{ caption: "駒を並べ直しましょう", onClick: () => { setIsInitial(true), init(); } },
 			]
 		});
 		else setAlert({
