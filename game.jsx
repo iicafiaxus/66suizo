@@ -22,7 +22,6 @@ const Game = function(props){
 	const start = () => {
 		setIsRunning(true);
 		setIsInitial(false);
-		console.log("start", {turn});
 		model.clocks[turn].start();
 		setIsAfterMove(true);
 	}
