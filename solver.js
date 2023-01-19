@@ -119,7 +119,9 @@ solver.calcBestMove = (positions, turn) => {
 }
 
 // TODO: have multiple parents
+solver.count = 0;
 solver.EvaluationItem = function(positions, turn, depth, parent = null, move){
+	solver.count += 1;
 	this.positions = positions;
 	this.turn = turn;
 	this.depth = depth;
@@ -319,13 +321,14 @@ solver.evaluate = (positions) => {
 solver.isWorking = false;
 solver.solve = (positions, turn, onFound) => {
 	console.log("考えています…");
+	solver.count = 0;
 	solver.isWorking = true;
 	solver.initEvaluation(
 		(item, length) => {
 			if( ! solver.isWorking) return false;
 			if(length == 0){
 				const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
-				console.log(bestMoveString, "(" + solver.rootItem?.value + ")");
+				console.log(bestMoveString, "(" + solver.rootItem?.value + ")", "in " + solver.count);
 				if(item?.move && (item.turn == 0 && item.value > -5000 || item.turn == 1 && item.value < 5000)){
 					onFound(item.move);
 				}
