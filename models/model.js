@@ -8,7 +8,8 @@ model.ySize = 6;
 model.cells = (function(model){
 	const cells = [];
 	for(let x = 0; x < model.xSize; x ++) for(let y = 0; y < model.ySize; y ++){
-		cells.push({ id: cells.length, x, y });
+		const name = "" + (6 - y) + ["一", "二", "三", "四", "五", "六"][x];
+		cells.push({ id: cells.length, x, y, name });
 	}
 	return cells;
 })(model);

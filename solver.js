@@ -347,14 +347,10 @@ solver.cancel = () => {
 	solver.isWorking = false;
 }
 
-solver.cellToString = (cell) => {
-	return "" + (6 - cell.y) + ["一", "二", "三", "四", "五", "六"][cell.x];
-}
-
 solver.moveToString = (move, player) => {
 	if( ! move) return "(null)";
 	if( ! move.piece || ! move.cell) return "(" + move.piece + ", " + move.cell + ")";
-	return (["☗", "☖"][player ?? move.player] ?? "-") + solver.cellToString(move.cell) + move.piece.entity.names[move.face] + move.piece.id;
+	return (["☗", "☖"][player ?? move.player] ?? "-") + move.cell.name + move.piece.entity.names[move.face] + move.piece.id;
 }
 
 solver.calcPositionKey = (positions, turn) => {
