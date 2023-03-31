@@ -31,10 +31,6 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	width: 700px; height: 300px;
 	border: none;
 }
-.board.komadai.player1{
-}
-.board.komadai.player0{
-}
 
 .boardside {
 	width: 900px; height: 316px;
