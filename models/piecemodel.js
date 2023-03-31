@@ -59,6 +59,47 @@ pieceModel.entities.bishop.lines = [[
 	[{dx: -1, dy: 0}], [{dx: 0, dy: -1}], [{dx: 0, dy: 1}], [{dx: 1, dy: 0}],
 ]];
 
+/*
+
+solver.lines = [];
+for(let player of [0, 1]){
+	solver.lines[player] = [];
+	for(let piece of model.pieces){
+		solver.lines[player][piece.id] = [];
+		for(let face of [0, 1]){
+			solver.lines[player][piece.id][face] = [];
+			for(let cell0 of model.cells){
+				if( ! solver.lines[player][piece.id][face][cell0.x])  solver.lines[player][piece.id][face][cell0.x] = [];
+				solver.lines[player][piece.id][face][cell0.x][cell0.y] = [];
+				const lines = piece.entity.lines[face];
+				for(let line of lines){
+					const cells = [];
+					for(let t of line){
+						const x1 = cell0.x + t.dx * [1, -1][player];
+						const y1 = cell0.y + t.dy * [1, -1][player];
+						for(let cell of model.cells){
+							if(x1 == cell.x && y1 == cell.y) cells.push(cell);
+						}
+					}
+					solver.lines[player][piece.id][face][cell0.x][cell0.y].push(cells);
+				}
+			}
+		}
+	}
+}
+*/
+
+for(let entity of Object.values(pieceModel.entities)){
+	for(let player of [0, 1]){
+		for(let face of [0, 1]){
+			
+		}
+	}
+}
+
+
+
+
 pieceModel.pieces = [
 	{id: 0, entity: pieceModel.entities.king, position: { x: 0, y: 3, face: 0, player: 1, isOut: false, isExcluded: false }},
 	{id: 1, entity: pieceModel.entities.king, position: { x: 5, y: 2, face: 0, player: 0, isOut: false, isExcluded: false }},
