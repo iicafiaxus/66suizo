@@ -45,32 +45,29 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .boardside .systemarea{
 	width: 172px; height: 300px; margin: 8px auto;
 	display: flex; flex-direction: column;
+	position: relative;
 }
 .boardside.player1 .systemarea{
 	flex-direction: column-reverse;
 }
 
-.boardside .systemarea .turn-indicator{
-	height: 16px;
-	background: #ccc;
-}
 @keyframes turn-indicator{
-	0% { background: #c336; }
-	50%{ background: #c333; }
-	100%{ background: #c336; }
-}
-.boardside.running .systemarea.active .turn-indicator{
-	height: 16px;
-	animation: turn-indicator 1s infinite;
+	0% { border-color: #c338; }
+	50%{ border-color: #c333; }
+	80%{ border-color: #c333; }
+	90%{ border-color: #c338; }
+	100%{ border-color: #c338; }
 }
 .boardside .systemarea .timer{
 	text-align: center;
 	font-size: 56px;
 	font-family: Nunito;
 	color: #666;
+	border: #0003 3px solid;
 }
 .boardside.running .systemarea.active .timer{
 	color: #600;
+	animation: turn-indicator 0.5s infinite;
 }
 
 
