@@ -176,24 +176,25 @@ const Game = function(props){
 
 
 	return (
-		<div>
-			<Board
-				xSize={xSize} ySize={ySize}
-				cells={cells}
-				pieces={pieces}
-				times={times}
-				positions={pieces.map(p => positions[p.id])}
-				turn={turn}
-				lastMove={lastMove}
-				isRunning={isRunning}
-				checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
-				checkIsPickable={(piece) =>
-					isRunning && ! model.useAi[turn] && model.checkIsPickable(piece, positions, turn)
-				}
-				move={move}
-				openMenu={openMenu}
-			/>
-
+		<React.Fragment>
+			<div className="game">
+				<Board
+					xSize={xSize} ySize={ySize}
+					cells={cells}
+					pieces={pieces}
+					times={times}
+					positions={pieces.map(p => positions[p.id])}
+					turn={turn}
+					lastMove={lastMove}
+					isRunning={isRunning}
+					checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}
+					checkIsPickable={(piece) =>
+						isRunning && ! model.useAi[turn] && model.checkIsPickable(piece, positions, turn)
+					}
+					move={move}
+					openMenu={openMenu}
+				/>
+			</div>
 			{alert && <Modal onClose={() => setAlert(null)}>
 				{alert.title && <div className="modal-title">{alert.title}</div>}
 				<div className="modal-body">
@@ -207,6 +208,6 @@ const Game = function(props){
 					)}
 				</div>
 			</Modal>}
-		</div>
+		</React.Fragment>
 	)
 }

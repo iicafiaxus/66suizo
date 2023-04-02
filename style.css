@@ -7,11 +7,18 @@
 	-webkit-tap-highlight-color: #0000;
 }
 html, body { margin: 0; padding: 0; }
-body { background: #ccc; }
+body {
+	overflow: hidden;
+	background: #ccc;
+}
 
 .root {
-	width: min(980px, 100%); margin: auto; background: #fff;
+	width: min(980px, 100%); height: 100%; 
+}
+.game {
+	width: 980px; margin: auto; background: #fff;
 	padding: 20px 0; 
+	transform-origin: top center;
 }
 
 h1 { text-align: center; letter-spacing: 0.1em; }

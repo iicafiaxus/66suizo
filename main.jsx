@@ -1,4 +1,5 @@
 "REQUIRE game.jsx";
+"REQUIRE style.js";
 
 const dom = document.createElement("div");
 dom.className = "root";
