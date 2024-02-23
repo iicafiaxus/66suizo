@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600');
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap');
 * {
 	font-family: "Nunito", "BIZ UDPMincho", sans-serif;
 	font-size: 24px; 
@@ -146,7 +147,8 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	letter-spacing: -2px; 
 	border-radius: 60px;
 	writing-mode: vertical-lr;
-	font-family: "Klee One"; font-weight: 600; 
+	/*font-family: "Klee One"; font-weight: 600; */
+	font-family: "Noto Sans JP"; font-weight: 700;
 	font-size: 48px; 
 	text-align: center;
 	user-select: none;
@@ -192,10 +194,18 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 
 .running .piece.player0{
-	background: #09c6;
+	box-shadow: #3aef -1px -2px 3px 0px inset;
+	background: radial-gradient(
+		circle at 40% 20%, #9eff,#6dff 70%, #3aef
+	);
+	text-shadow: -1px -2px 2px #fff9;
 }
 .running .piece.player1{
-	background: #dc06;
+	box-shadow: #ec6f 1px 2px 3px 0px inset;
+	background: radial-gradient(
+		circle at 60% 80%, #ff9f, #fe6f 70%,  #ec6f
+	);
+	text-shadow: 1px 2px 2px #fff9;
 }
 
 .modal-system {
