@@ -54,7 +54,9 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	user-select: none;
 }
 .board.running, .running .board {
-	background: #eed;
+	background: linear-gradient(
+		150deg, #eedf, #ffff 30%, #eedf 60%, #eeef
+	);
 }
 
 .board.komadai{
