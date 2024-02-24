@@ -103,7 +103,6 @@ model.clocks = [0, 1].map(player => ({
 }));
 
 model.makeMoveString = (piece, cell, positions, face, lastCell) => {
-	console.log({piece, cell, positions, face, lastCell});
 	const mark = ["☗", "☖"][positions[piece.id].player];
 	const cellName = cell.id == lastCell?.id ? "同" : cell.name;
 	const isPut = positions[piece.id].isOut;
