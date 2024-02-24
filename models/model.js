@@ -118,10 +118,12 @@ model.makeMoveString = (piece, cell, positions, face, lastCell) => {
 	const canPromote = model.checkPromotion(piece, cell, positions)[1];
 	const originalFace = positions[piece.id].face;
 	const promotes = originalFace != face;
-	return mark + cellName + piece.entity.shortNames[originalFace]
+	const result = mark + cellName + piece.entity.shortNames[originalFace]
 		+ (promotes ? "成" : "")
 		+ (face == 0 && canPromote ? "不成" : "")
 		+ (otherCells.length && ! isPut ? "(" + model.getCell(positions[piece.id].x, positions[piece.id].y).name + ")" : "")
 		+ (otherCells.length && isPut ? "打" : "");
+	if(result.length <= 3) return result.charAt(0) + result.charAt(1) + "　" + result.charAt(2);
+	else return result;
 	// 仮実装
 }
