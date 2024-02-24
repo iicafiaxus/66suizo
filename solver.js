@@ -167,7 +167,6 @@ solver.EvaluationItem.prototype.removeWait = function(){
 solver.makeLineString = (item) => {
 	let s = "";
 	for(let c = item; c && c.move; c = c.nextItem){
-		//s += " " + solver.moveToString(c.move);
 		s += " " + model.makeMoveString(c.move.piece, c.move.cell,
 			c.positions, c.move.face, c.parent?.move?.cell);
 	}
