@@ -52,7 +52,7 @@ const Game = function(props){
 
 	const openMenu = () => {
 		if(isInitial) setAlert({
-			message: "対局を始めましょう。",
+			message: "先後を決めましょう。",
 			options: [
 				{ caption: "ＡＩが先手", onClick: () => setTurn(1) + start() },
 				{ caption: "あなたが先手", onClick: () => setTurn(0) + start() },
@@ -60,12 +60,14 @@ const Game = function(props){
 			]
 		});
 		else if( ! isRunning) setAlert({
+			message: "対局を再開します。",
 			options: [
-				{ caption: "対局再開", onClick: start },
-				{ caption: "リセット", onClick: () => { setIsInitial(true), init(); } },
+				{ caption: "初めから", onClick: () => { setIsInitial(true), init(); } },
+				{ caption: "つづきから", onClick: start },
 			]
 		});
 		else setAlert({
+			message: "どうしますか？",
 			options: [
 				! model.useAi[turn] && { caption: "投了します", onClick: resign },
 				{ caption: "中断", onClick: stop }
