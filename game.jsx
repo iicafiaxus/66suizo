@@ -200,13 +200,15 @@ const Game = function(props){
 				{alert.title && <div className="modal-title">{alert.title}</div>}
 				<div className="modal-body">
 					{alert.message && <div className="alert-message">{alert.message}</div>}
-					{alert.options.map(opt => 
-						opt && <button
-							className={opt.isPrimary ? "primaryButton" : ""}
-							onClick={() => {setAlert(null); opt.onClick()}}
-							key={opt.caption}
-						>{opt.caption}</button>
-					)}
+					{alert.options.length && <div className="buttons">
+						{alert.options.map(opt => 
+							opt && <button
+								className={opt.isPrimary ? "primaryButton" : ""}
+								onClick={() => {setAlert(null); opt.onClick()}}
+								key={opt.caption}
+							>{opt.caption}</button>
+						)}
+					</div>}
 				</div>
 			</Modal>}
 		</React.Fragment>

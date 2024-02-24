@@ -248,13 +248,22 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	font-size: min(6vmin, 30px);
 }
 .modal-main .alert-message{
-	margin: 8px 0 24px;
+	margin: 8px 0 0.3em;
+}
+.modal-main .buttons{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
 }
 .modal-main button{
-	min-height: calc(2em + 8px);
+	min-width: 6em;
+	min-height: 2.25em;
+	height: fit-content;
+	align-self: center;
 	font-size: min(7.2vmin, 36px); 
-	margin: 16px 8px; 
-	padding: 0 4px;
+	margin: 0.5em 0.25em;
+	padding: 0 calc(4px + 0.5em);
 	cursor: pointer;
 	user-select: none;
 }
