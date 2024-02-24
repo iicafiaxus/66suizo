@@ -32,6 +32,7 @@ const Game = function(props){
 	}
 
 	const [alert, setAlert] = React.useState(null);
+	const [status, setStatus] = React.useState("");
 
 	const [isInitial, setIsInitial] = React.useState(true);
 	const init = () => {
@@ -146,8 +147,22 @@ const Game = function(props){
 	};
 
 	const handleAiMove = (m) => { // m: move object
-		if(isRunning && m) moveWithFace(m.piece, m.cell, m.face);
-		else resign(); // no possible move
+		if(isRunning && m){
+			setStatus("指しました。あなたの手番です。");
+			moveWithFace(m.piece, m.cell, m.face);
+		}
+		else{
+			setStatus("有効な手がありません。");
+			resign(); // no possible move
+		}
+	}
+	const handleAiMessage = (param) => {
+		if( ! param) return;
+		if(param.message) setStatus(param.message);
+		else setStatus("考えています... "
+			 + (param.move ? solver.moveToString(param.move, turn) : "")
+			 + (param.value ? " (" + param.value + ")" : "")
+		);
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);
@@ -175,14 +190,14 @@ const Game = function(props){
 		if( ! isCallingAi) return;
 		setIsCallingAi(false);
 		if( ! isRunning) return;
-		solver.solve(positions, turn, handleAiMove);
+		solver.solve(positions, turn, handleAiMove, handleAiMessage);
 	}, [isCallingAi, isRunning]);
 
 
 	return (
 		<React.Fragment>
 			<div className={"game" + (isRunning ? " running" : "")}>
-				<SystemArea turn={turn} times={times} />
+				<SystemArea turn={turn} times={times} status={status} />
 				<Board
 					xSize={xSize} ySize={ySize}
 					cells={cells}

@@ -76,10 +76,23 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	user-select: none;
 }
 .systemarea{
+	width: 100%; 
+	display: flex; flex-direction: row; justify-content: space-between;
+}
+.systemarea .timers{
 	width: 172px; margin: 8px 24px 8px auto;
-	display: flex; flex-direction: column;
 	position: relative;
 }
+.systemarea .status{
+	font-size: 36px;
+	padding: 0 16px;
+	margin: 8px;
+	height: min-content;
+	align-self: center;
+	max-height: 166px;
+	overflow-y: auto;
+}
+
 
 @keyframes turn-indicator{
 	0% { border-color: #c338; }

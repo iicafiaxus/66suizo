@@ -319,7 +319,7 @@ solver.evaluate = (positions) => {
 }
 
 solver.isWorking = false;
-solver.solve = (positions, turn, onFound) => {
+solver.solve = (positions, turn, onFound, onUpdated) => {
 	console.log("考えています…");
 	solver.count = 0;
 	solver.isWorking = true;
@@ -334,7 +334,10 @@ solver.solve = (positions, turn, onFound) => {
 				}
 				else onFound(null);
 			}
-			else return true;
+			else{
+				onUpdated({ move: item?.move, value: item?.value });
+				return true;
+			}
 			return false;
 		},
 		positions,
