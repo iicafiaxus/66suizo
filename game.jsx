@@ -19,13 +19,15 @@ const Game = function(props){
 	const [lastMove, setLastMove] = React.useState(null);
 
 	const [isRunning, setIsRunning] = React.useState(false);
-	const start = () => {
+	const start = (turnToStart = turn) => {
+		if(turnToStart == 0) setStatus("あなたの手番です。");
 		setIsRunning(true);
 		setIsInitial(false);
-		model.clocks[turn].start();
+		model.clocks[turnToStart].start();
 		setIsAfterMove(true);
 	}
 	const stop = () => {
+		setStatus("");
 		model.clocks[turn].stop();
 		solver.cancel();
 		setIsRunning(false);
@@ -55,8 +57,8 @@ const Game = function(props){
 		if(isInitial) setAlert({
 			message: "先後を決めましょう。",
 			options: [
-				{ caption: "ＡＩが先手", onClick: () => setTurn(1) + start() },
-				{ caption: "あなたが先手", onClick: () => setTurn(0) + start() },
+				{ caption: "ＡＩが先手", onClick: () => setTurn(1) + start(1) },
+				{ caption: "あなたが先手", onClick: () => setTurn(0) + start(0) },
 				{ caption: "ランダム", onClick: () => setTurn(Math.floor(Math.random() * 2)) + start() },
 			]
 		});
@@ -81,25 +83,29 @@ const Game = function(props){
 		const winner = model.checkWinner(positions);
 		if(winner){
 			setIsRunning(false);
+			const message = ["あなた", "ＡＩ"][winner.player] + "の勝ちです。";
 			setAlert({
 				title: "",
-				message: ["あなた", "ＡＩ"][winner.player] + "の勝ちです。",
+				message,
 				options: [
 					{ caption: "ＯＫ", onClick: stop },
 				]
 			});
+			setStatus(message);
 		}
 	};
 
 	const resign = () => {
 		setIsRunning(false);
+		const message = "投了しました。" + ["あなた", "ＡＩ"][1 - turn] + "の勝ちです。";
 		setAlert({
 			title: "",
-			message: "投了しました。" + ["あなた", "ＡＩ"][1 - turn] + "の勝ちです。",
+			message,
 			options: [
 				{ caption: "ＯＫ", onClick: stop },
 			]
 		});
+		setStatus(message);
 	}
 
 	const move = (piece, cell) => {
