@@ -228,33 +228,33 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	);
 	border-radius: 8px; border: 2px solid #000f;
 	box-shadow: #0008 0px 0px 20px 0px; 
-	max-width: 90vw; max-height: 90vh;
+	max-width: 90vw; max-height: 90vh; overflow-y: auto;
 	min-width: 50vw; min-height: min(30vw, 50vh);
 	left: 50%; top: 40%; transform: translate(-50%, -40%);
-	display: flex; flex-direction: column; justify-content: center;
+	display: flex; flex-direction: column;
 }
 .modal-title{
 	background: #f99;
 	padding: 8px; 
 }
 .modal-body {
-	padding: 16px 48px;
-	width: max-content; margin: auto; 
+	padding: 16px 24px;
+	width: max-content; max-width: calc(100% - 48px); margin: auto; 
 	display: flex; flex-direction: column; justify-content: space-around;
 	flex-grow: 1;
 }
 
 .modal-main *{
-	font-size: 30px;
+	font-size: min(6vmin, 30px);
 }
 .modal-main .alert-message{
 	margin: 8px 0 24px;
 }
 .modal-main button{
-	min-height: 80px; 
-	font-size: 36px; 
+	min-height: calc(2em + 8px);
+	font-size: min(7.2vmin, 36px); 
 	margin: 16px 8px; 
-	padding: 0 24px;
+	padding: 0 4px;
 	cursor: pointer;
 	user-select: none;
 }
