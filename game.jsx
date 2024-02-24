@@ -116,6 +116,7 @@ const Game = function(props){
 		else moveWithFace(piece, cell, promo[0] ? 0 : 1);
 	}
 	const moveWithFace = (piece, cell, face) => {
+		console.log(model.makeMoveString(piece, cell, positions, face, lastMove?.cell));
 		for(let p of pieces.filter(p =>
 			positions[p.id].x == cell.x && positions[p.id].y == cell.y
 		)) moveToKomadai(p, positions[piece.id].player);

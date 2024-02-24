@@ -14,6 +14,7 @@ model.cells = (function(model){
 	}
 	return cells;
 })(model);
+model.getCell = (x, y) => model.cells[x * model.ySize + y];
 
 model.pieces = pieceModel.pieces;
 
@@ -105,6 +106,14 @@ model.clocks = [0, 1].map(player => ({
 model.makeMoveString = (piece, cell, positions, face, lastCell) => {
 	const mark = ["☗", "☖"][positions[piece.id].player];
 	const cellName = cell.id == lastCell?.id ? "同" : cell.name;
+	const otherCells = model.pieces.map(p => {
+		if(p.entity.id == piece.entity.id && positions[p.id].player == positions[piece.id].player
+			&& p.id != piece.id && ! positions[p.id].isOut && ! positions[p.id].isExcluded
+			&& model.checkCanMove(p, cell, positions)){
+			return model.getCell(positions[p.id].x, positions[p.id].y);
+		}
+		else return void 0;
+	}).filter(c => c);
 	const isPut = positions[piece.id].isOut;
 	const canPromote = model.checkPromotion(piece, cell, positions)[1];
 	const originalFace = positions[piece.id].face;
@@ -112,6 +121,7 @@ model.makeMoveString = (piece, cell, positions, face, lastCell) => {
 	return mark + cellName + piece.entity.shortNames[originalFace]
 		+ (promotes ? "成" : "")
 		+ (face == 0 && canPromote ? "不成" : "")
-		+ (isPut ? "打" : "");
+		+ (otherCells.length && ! isPut ? "(" + model.getCell(positions[piece.id].x, positions[piece.id].y).name + ")" : "")
+		+ (otherCells.length && isPut ? "打" : "");
 	// 仮実装
 }
