@@ -167,7 +167,9 @@ solver.EvaluationItem.prototype.removeWait = function(){
 solver.makeLineString = (item) => {
 	let s = "";
 	for(let c = item; c && c.move; c = c.nextItem){
-		s += " " + solver.moveToString(c.move);
+		//s += " " + solver.moveToString(c.move);
+		s += " " + model.makeMoveString(c.move.piece, c.move.cell,
+			c.positions, c.move.face, c.parent?.move?.cell);
 	}
 	return s;
 }
@@ -328,7 +330,7 @@ solver.solve = (positions, turn, onFound, onUpdated) => {
 			if( ! solver.isWorking) return false;
 			if(length == 0){
 				const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
-				console.log(bestMoveString, "(" + solver.rootItem?.value + ")", "in " + solver.count);
+				console.log("読み筋 :" + bestMoveString, "(" + solver.rootItem?.value + ") " + solver.count);
 				if(item?.move && (item.turn == 0 && item.value > -5000 || item.turn == 1 && item.value < 5000)){
 					onFound(item.move);
 				}
