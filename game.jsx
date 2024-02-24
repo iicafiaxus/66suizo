@@ -53,20 +53,20 @@ const Game = function(props){
 	const openMenu = () => {
 		if(isInitial) setAlert({
 			options: [
-				{ caption: "一局よろしくお願いします", onClick: start, isPrimary: true },
+				{ caption: "新規対局", onClick: start, isPrimary: true },
 				{ caption: "あとで", onClick: () => void 0 },
 			]
 		});
 		else if( ! isRunning) setAlert({
 			options: [
-				{ caption: "続きから指しましょう", onClick: start },
-				{ caption: "駒を並べ直しましょう", onClick: () => { setIsInitial(true), init(); } },
+				{ caption: "対局再開", onClick: start },
+				{ caption: "リセット", onClick: () => { setIsInitial(true), init(); } },
 			]
 		});
 		else setAlert({
 			options: [
-				! model.useAi[turn] && { caption: "負けました（投了）", onClick: resign },
-				{ caption: "中断しましょう", onClick: stop }
+				! model.useAi[turn] && { caption: "投了します", onClick: resign },
+				{ caption: "中断", onClick: stop }
 			]
 		});
 	}

@@ -3,7 +3,8 @@
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap');
 * {
-	font-family: "Nunito", "BIZ UDPMincho", sans-serif;
+	font-family: "Klee One", sans-serif;
+	letter-spacing: -0.1em;
 	font-size: 24px; 
 	-webkit-tap-highlight-color: #0000;
 }
@@ -87,6 +88,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	text-align: center;
 	font-size: 56px;
 	font-family: Nunito;
+	letter-spacing: 0;
 	color: #666;
 	border: #0003 3px solid;
 }
