@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600');
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&display=swap');
 * {
 	font-family: "Klee One", sans-serif;
 	letter-spacing: -0.1em;
@@ -101,13 +101,13 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	animation: turn-indicator 0.5s infinite;
 }
 .systemarea .timer.player0{
-	background: #9df9;
+	background: #bef9;
 }
 .systemarea .timer.player1{
 	background: #ff99;
 }
 .systemarea .timer.player0.active{
-	background: #9dff;
+	background: #beff;
 }
 .systemarea .timer.player1.active{
 	background: #ff9f;
@@ -164,8 +164,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	letter-spacing: -2px; 
 	border-radius: 60px;
 	writing-mode: vertical-lr;
-	/*font-family: "Klee One"; font-weight: 600; */
-	font-family: "Noto Sans JP"; font-weight: 700;
+	font-family: "Zen Kaku Gothic New"; font-weight: 700;
 	font-size: 48px; 
 	text-align: center;
 	user-select: none;
