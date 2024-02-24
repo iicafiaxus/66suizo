@@ -23,8 +23,14 @@ body {
 	transform-origin: top center;
 	display: flex; flex-direction: column;
 }
+.boardset{
+	display: flex; flex-direction: column;
+}
 .wide .game {
-	width: 1548px; flex-direction: row;
+	width: 1548px;
+}
+.wide .boardset{
+	flex-direction: row;
 }
 .wide .board {
 	margin: 8px;
@@ -36,11 +42,11 @@ body {
 	width: 316px; height: 900px;
 	flex-direction: column;
 }
-.wide .boardside.player0 {
+.boardside.player0 {
 	align-self: flex-end;
 	justify-content: flex-end;
 }
-.wide .boardside.player1 {
+.boardside.player1 {
 	align-self: flex-start;
 	justify-content: flex-start;
 }
@@ -60,21 +66,19 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .board.komadai{
 	width: 700px; height: 300px;
 	border: none;
+	margin: 8px;
 }
 
 .boardside {
-	width: 900px; height: 316px;
-	margin: 8px auto;
+	height: 316px;
+	margin: 8px;
 	display: flex; justify-content: space-between;
 	user-select: none;
 }
-.boardside .systemarea{
-	width: 172px; margin: 8px auto;
+.systemarea{
+	width: 172px; margin: 8px 24px 8px auto;
 	display: flex; flex-direction: column;
 	position: relative;
-}
-.boardside.player1 .systemarea{
-	flex-direction: column-reverse;
 }
 
 @keyframes turn-indicator{
@@ -84,17 +88,29 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	90%{ border-color: #c338; }
 	100%{ border-color: #c338; }
 }
-.boardside .systemarea .timer{
+.systemarea .timer{
 	text-align: center;
 	font-size: 56px;
 	font-family: Nunito;
 	letter-spacing: 0;
-	color: #666;
+	color: #6669;
 	border: #0003 3px solid;
 }
-.boardside.running .systemarea.active .timer{
-	color: #600;
+.running .systemarea .timer.active{
+	color: #000c;
 	animation: turn-indicator 0.5s infinite;
+}
+.systemarea .timer.player0{
+	background: #9df9;
+}
+.systemarea .timer.player1{
+	background: #ff99;
+}
+.systemarea .timer.player0.active{
+	background: #9dff;
+}
+.systemarea .timer.player1.active{
+	background: #ff9f;
 }
 
 

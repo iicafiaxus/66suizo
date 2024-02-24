@@ -177,14 +177,13 @@ const Game = function(props){
 
 	return (
 		<React.Fragment>
-			<div className="game">
+			<div className={"game" + (isRunning ? " running" : "")}>
+				<SystemArea turn={turn} times={times} />
 				<Board
 					xSize={xSize} ySize={ySize}
 					cells={cells}
 					pieces={pieces}
-					times={times}
 					positions={pieces.map(p => positions[p.id])}
-					turn={turn}
 					lastMove={lastMove}
 					isRunning={isRunning}
 					checkCanMove={(piece, cell) => model.checkCanMove(piece, cell, positions)}

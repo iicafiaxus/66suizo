@@ -14,7 +14,14 @@ const SystemArea = function(props){
 		return fillertext.substring(fillertext.length - filler.length);
 	}
 
-	return <div className={"systemarea" + (props.isActive ? " active" : "")}>
-		<div className="timer">{formatTime(props.time)}</div>
-	</div>
+	return <React.Fragment>
+		<div className="systemarea">
+			<div className={"timer player1" + (props.turn == 1 ? " active" : "")}>
+				{formatTime(props.times[1])}
+			</div>
+			<div className={"timer player0" + (props.turn == 0 ? " active" : "")}>
+				{formatTime(props.times[0])}
+			</div>
+		</div>
+	</React.Fragment>
 }

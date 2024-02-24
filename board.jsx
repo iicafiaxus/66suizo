@@ -47,7 +47,7 @@ const Board = function(props){
 	);
 
 	return (
-		<React.Fragment>
+		<div className="boardset">
 			<div className={"boardside player1" + (props.isRunning ? " running" : "")}>
 				<div className="board komadai player1">
 					<Cell
@@ -58,10 +58,6 @@ const Board = function(props){
 						{renderPieces(getKomadaiPieces(1))}
 					</Cell>
 				</div>
-				<SystemArea player="1"
-					isActive={props.turn == "1"}
-					time={props.times[1]}
-				/>
 			</div>
 
 			<div
@@ -85,10 +81,6 @@ const Board = function(props){
 			</div>
 
 			<div className={"boardside player0" + (props.isRunning ? " running" : "")}>
-				<SystemArea player="0"
-					isActive={props.turn == "0"}
-					time={props.times[0]}
-				/>
 				<div className="board komadai player0">
 					<Cell
 						cell={{x: 0, y: 0, player: 0}}
@@ -99,7 +91,6 @@ const Board = function(props){
 					</Cell>
 				</div>
 			</div>
-
-	</React.Fragment>
+		</div>
 	)
 };
