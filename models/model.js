@@ -8,7 +8,8 @@ model.ySize = 6;
 model.cells = (function(model){
 	const cells = [];
 	for(let x = 0; x < model.xSize; x ++) for(let y = 0; y < model.ySize; y ++){
-		const name = "" + (6 - y) + ["一", "二", "三", "四", "五", "六"][x];
+		const name = "" + ["１", "２", "３", "４", "５", "６"][6 - y - 1]
+			+ ["一", "二", "三", "四", "五", "六"][x];
 		cells.push({ id: cells.length, x, y, name });
 	}
 	return cells;
@@ -100,3 +101,18 @@ model.clocks = [0, 1].map(player => ({
 		this.timeSpent = 0;
 	}
 }));
+
+model.makeMoveString = (piece, cell, positions, face, lastCell) => {
+	console.log({piece, cell, positions, face, lastCell});
+	const mark = ["☗", "☖"][positions[piece.id].player];
+	const cellName = cell.id == lastCell?.id ? "同" : cell.name;
+	const isPut = positions[piece.id].isOut;
+	const canPromote = model.checkPromotion(piece, cell, positions)[1];
+	const originalFace = positions[piece.id].face;
+	const promotes = originalFace != face;
+	return mark + cellName + piece.entity.shortNames[originalFace]
+		+ (promotes ? "成" : "")
+		+ (face == 0 && canPromote ? "不成" : "")
+		+ (isPut ? "打" : "");
+	// 仮実装
+}

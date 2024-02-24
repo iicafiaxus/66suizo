@@ -1,12 +1,18 @@
 const pieceModel = {};
 
 pieceModel.entities = {
-	king: { id: 0, names: ["王将", "　"], size: 4, life: [1, 0], isSingleFaced: true, isSingleUse: true },
-	queen: { id: 1, names: ["酔象", "太子"], size: 4, life: [0, 1], forcePromotion: 0 },
-	rook: { id: 2, names: ["飛車", "龍王"], size: 3, life: [0, 0], forcePromotion: 0 },
-	bishop: { id: 3, names: ["角行", "龍馬"], size: 3, life: [0, 0], forcePromotion: 0 },
-	silver: { id: 4, names: ["銀将", "金"], size: 2, life: [0, 0], forcePromotion: 0 },
-	pawn: { id: 5, names: ["歩兵", "と"], size: 1, life: [0, 0], forcePromotion: 1, occupiesColumn: true },
+	king: { id: 0, names: ["王将", "　"], shortNames: ["玉", "　"],
+		size: 4, life: [1, 0], isSingleFaced: true, isSingleUse: true },
+	queen: { id: 1, names: ["酔象", "太子"], shortNames: ["酔象", "太子"],
+		size: 4, life: [0, 1], forcePromotion: 0 },
+	rook: { id: 2, names: ["飛車", "龍王"], shortNames: ["飛", "竜"],
+		size: 3, life: [0, 0], forcePromotion: 0 },
+	bishop: { id: 3, names: ["角行", "龍馬"], shortNames: ["角", "馬"],
+		size: 3, life: [0, 0], forcePromotion: 0 },
+	silver: { id: 4, names: ["銀将", "金"], shortNames: ["銀", "成銀"],
+		size: 2, life: [0, 0], forcePromotion: 0 },
+	pawn: { id: 5, names: ["歩兵", "と"], shortNames: ["歩", "と"],
+		size: 1, life: [0, 0], forcePromotion: 1, occupiesColumn: true },
 };
 
 pieceModel.entities.king.lines = [[

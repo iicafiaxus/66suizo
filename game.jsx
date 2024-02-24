@@ -160,7 +160,9 @@ const Game = function(props){
 		if( ! param) return;
 		if(param.message) setStatus(param.message);
 		else setStatus("考えています... "
-			 + (param.move ? solver.moveToString(param.move, turn) : "")
+			 + (param.move ? model.makeMoveString(
+					param.move.piece, param.move.cell, positions, param.move.face, lastMove?.cell
+				) : "")
 			 + (param.value ? " (" + param.value + ")" : "")
 		);
 	}
