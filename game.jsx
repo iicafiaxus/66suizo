@@ -52,9 +52,11 @@ const Game = function(props){
 
 	const openMenu = () => {
 		if(isInitial) setAlert({
+			message: "対局を始めましょう。",
 			options: [
-				{ caption: "新規対局", onClick: start, isPrimary: true },
-				{ caption: "あとで", onClick: () => void 0 },
+				{ caption: "ＡＩが先手", onClick: () => setTurn(1) + start() },
+				{ caption: "あなたが先手", onClick: () => setTurn(0) + start() },
+				{ caption: "ランダム", onClick: () => setTurn(Math.floor(Math.random() * 2)) + start() },
 			]
 		});
 		else if( ! isRunning) setAlert({
@@ -78,9 +80,9 @@ const Game = function(props){
 			setIsRunning(false);
 			setAlert({
 				title: "",
-				message: ["先手", "後手"][winner.player] + "の勝ちです。",
+				message: ["あなた", "ＡＩ"][winner.player] + "の勝ちです。",
 				options: [
-					{ caption: "OK", onClick: stop },
+					{ caption: "ＯＫ", onClick: stop },
 				]
 			});
 		}
@@ -90,9 +92,9 @@ const Game = function(props){
 		setIsRunning(false);
 		setAlert({
 			title: "",
-			message: "投了しました。" + ["先手", "後手"][1 - turn] + "の勝ちです。",
+			message: "投了しました。" + ["あなた", "ＡＩ"][1 - turn] + "の勝ちです。",
 			options: [
-				{ caption: "OK", onClick: stop },
+				{ caption: "ＯＫ", onClick: stop },
 			]
 		});
 	}
