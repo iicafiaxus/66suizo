@@ -3,6 +3,7 @@
 "REQUIRE board.jsx";
 "REQUIRE models/model.js";
 "REQUIRE solver.js";
+"REQUIRE solver2.js";
 
 const Game = function(props){
 	const xSize = model.xSize, ySize = model.ySize;
@@ -17,6 +18,7 @@ const Game = function(props){
 	const [turn, setTurn] = React.useState(model.turn);
 
 	const [lastMove, setLastMove] = React.useState(null);
+	const [history, setHistory] = React.useState([]);
 
 	const [isRunning, setIsRunning] = React.useState(false);
 	const start = (turnToStart = turn) => {
@@ -41,6 +43,7 @@ const Game = function(props){
 		for(let p of pieces) setPositions[p.id](p.position);
 		setTurn(model.turn);
 		setLastMove(null);
+		setHistory([]);
 		setIsRunning(false);
 		for(let clock of model.clocks){
 			clock.stop();
@@ -108,55 +111,53 @@ const Game = function(props){
 		setStatus(message);
 	}
 
-	const move = (piece, cell) => {
+	const moveManually = (piece, cell) => {
 		if( ! model.checkCanMove(piece, cell, positions)) return;
 		const promo = model.checkPromotion(piece, cell, positions);
+			// returns [a, b]; a: can keep raw, b: can promote
+		const newPosition = { ...positions[piece.id], x: cell.x, y: cell.y, face: promo[1] ? 1 : 0 };
+		const captured = pieces.find(p =>
+			positions[p.id].x == cell.x && positions[p.id].y == cell.y
+		);
+		const capturedPosition = captured ? { ...positions[captured.id],
+			face: 0, player: positions[piece.id].player, isOut: true, isExcluded: captured.entity.isSingleUse
+		} : null;
+		const move = {
+			main: { piece, newPosition, oldPosition: positions[piece.id] },
+			captured: captured ? {
+				piece: captured, newPosition: capturedPosition, oldPosition: positions[captured.id]
+			} : null,
+			likeliness: 0,
+		};
 		if(promo[0] && promo[1]){
 			setAlert({
 				options: [
-					{ caption: "成る", onClick: () => moveWithFace(piece, cell, 1), isPrimary: true },
-					{ caption: "成らない", onClick: () => moveWithFace(piece, cell, 0) },
+					{ caption: "成る", onClick: () => perform(move), isPrimary: true },
+					{ caption: "成らない", onClick: () => { move.main.newPosition.face = 0, perform(move) } },
 				]				
 			});
 		}
-		else moveWithFace(piece, cell, promo[0] ? 0 : 1);
+		else perform(move);
 	}
-	const moveWithFace = (piece, cell, face) => {
-		console.log(model.makeMoveString(piece, cell, positions, face, lastMove?.cell));
-		for(let p of pieces.filter(p =>
-			positions[p.id].x == cell.x && positions[p.id].y == cell.y
-		)) moveToKomadai(p, positions[piece.id].player);
-		setPositions[piece.id](pos => ({
-			...pos,
-			x: cell.x,
-			y: cell.y,
-			face: face,
-			isOut: false,
-			isFloating: false
-		}));
+	const perform = (move) => {
+		if(move.main) setPositions[move.main.piece.id](move.main.newPosition);
+		if(move.captured) setPositions[move.captured.piece.id](move.captured.newPosition);
 		model.clocks[turn].stop();
 		model.clocks[1 - turn].start();
 		setTurn(1 - turn);
-		setLastMove({ piece, cell, face });
+		setLastMove({
+			piece: move.main.piece,
+			cell: model.getCell(move.main.newPosition.x, move.main.newPosition.y),
+			face: move.main.newPosition.face
+		});
+		setHistory(h => [...h, move]);
 		setIsAfterMove(true);
-	};
-	const moveToKomadai = (piece, player) => {
-		setPositions[piece.id](pos => ({
-			...pos, 
-			x: -1,
-			y: -1,
-			face: 0,
-			player: player,
-			isOut: true,
-			isFloating: false,
-			isExcluded: piece.entity.isSingleUse,
-		}));
-	};
+	}
 
-	const handleAiMove = (m) => { // m: move object
-		if(isRunning && m){
+	const handleAiMove = (move) => { // m: move object (new)
+		if(isRunning && move){
 			setStatus("指しました。あなたの手番です。");
-			moveWithFace(m.piece, m.cell, m.face);
+			perform(move);
 		}
 		else{
 			setStatus("有効な手がありません。");
@@ -199,7 +200,7 @@ const Game = function(props){
 		if( ! isCallingAi) return;
 		setIsCallingAi(false);
 		if( ! isRunning) return;
-		solver.solve(positions, turn, handleAiMove, handleAiMessage);
+		solver.solve(positions, turn, handleAiMove, handleAiMessage, history);
 	}, [isCallingAi, isRunning]);
 
 
@@ -218,7 +219,7 @@ const Game = function(props){
 					checkIsPickable={(piece) =>
 						isRunning && ! model.useAi[turn] && model.checkIsPickable(piece, positions, turn)
 					}
-					move={move}
+					move={moveManually}
 					openMenu={openMenu}
 				/>
 			</div>
