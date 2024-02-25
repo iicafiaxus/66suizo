@@ -115,11 +115,12 @@ const Game = function(props){
 		if( ! model.checkCanMove(piece, cell, positions)) return;
 		const promo = model.checkPromotion(piece, cell, positions);
 			// returns [a, b]; a: can keep raw, b: can promote
-		const newPosition = { ...positions[piece.id], x: cell.x, y: cell.y, face: promo[1] ? 1 : 0 };
+		const newPosition = { ...positions[piece.id], x: cell.x, y: cell.y, face: promo[1] ? 1 : 0,
+			isOut: false };
 		const captured = pieces.find(p =>
 			positions[p.id].x == cell.x && positions[p.id].y == cell.y
 		);
-		const capturedPosition = captured ? { ...positions[captured.id],
+		const capturedPosition = captured ? { ...positions[captured.id], x: -1, y: -1, 
 			face: 0, player: positions[piece.id].player, isOut: true, isExcluded: captured.entity.isSingleUse
 		} : null;
 		const move = {
