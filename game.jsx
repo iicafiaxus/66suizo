@@ -169,7 +169,7 @@ const Game = function(props){
 		if( ! param) return;
 		if(param.message) setStatus(param.message);
 		else setStatus([
-			"考えています",
+			//"考えています",
 			//(param.counter ?? "0") + "手",
 			param.move ? "(" + param.move?.name + " を検討中)..." : "",
 			param.bestMove ? "候補手 : " + param.bestMove?.name + " (" + param.value + ")" : "",
