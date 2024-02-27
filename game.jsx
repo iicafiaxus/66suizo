@@ -168,12 +168,12 @@ const Game = function(props){
 	const handleAiMessage = (param) => {
 		if( ! param) return;
 		if(param.message) setStatus(param.message);
-		else setStatus("考えています... "
-			 + (param.move ? model.makeMoveString(
-					param.move.piece, param.move.cell, positions, param.move.face, lastMove?.cell
-				) : "")
-			 + (param.value ? " (" + param.value + ")" : "")
-		);
+		else setStatus([
+			"考えています",
+			//(param.counter ?? "0") + "手",
+			param.move ? "(" + param.move?.name + " を検討中)..." : "",
+			param.bestMove ? "候補手 : " + param.bestMove?.name + " (" + param.value + ")" : "",
+		].join(" "));
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);

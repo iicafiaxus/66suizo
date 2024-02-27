@@ -1,17 +1,178 @@
 "REQUIRE models/model.js";
 "REQUIRE util.js";
+"REQUIRE solver.js";
 
 solver.current = null;
-solver.initEvaluation2 = (onFound, positions, turn, lastMove, lastMove2, depth = 4) => {
-	solver.current = { positions, turn, depth, bestMoveLine: [] };
-	//solver.antimoveStack = [];
-	//solver.queue = new Util.Queue();
-	//solver.evaluationStack = new Util.Queue();
-	// スタックはコールスタックでやるのでいらない →　それだと中断できない…
-	// あとで書き直す
-	const [value, moveLine] = solver.evaluateRecursive(-10000, 10000, lastMove, lastMove2);
-	console.log("読み筋 : " + solver.makeMoveLineString(moveLine) + " (" + value + ")");
-	onFound(moveLine && moveLine.at(-1));
+solver.initEvaluation2 = (onFound, onUpdated, positions, turn, lastMove, lastMove2, depth = 4) => {
+	solver.current = { positions, turn, depth, bestMoveLine: [], history: [lastMove, lastMove2] };
+	solver.counter = 0;
+	console.log(solver.makePositionString(solver.current.positions));
+	solver.onEnd = (value, moveLine) => {
+		console.log("読み筋 : " + solver.makeMoveLineString(moveLine) + " (" + value + ")");
+		solver.isWorking = false;
+		onFound(moveLine && moveLine.at(-1));
+	};
+	solver.onUpdated = (param) => {
+		onUpdated(param);
+	}
+	solver.stack = [{
+		turn, move: {}, queue: null, value: turn ? 10000 : -10000, min: -10000, max: 10000, 
+		bestLine: [], parent: null
+	}];
+	solver.evaluateFromStack();
+}
+// stackItem: { queue: Util.Queue(move), value, min, max, history };
+
+/*
+TODO
+・劣後度（優先度トップとの差）の累積が大きい手は無視する（捨てる手のとき）
+
+・initEvaluation2等の引数を見直す
+
+*/
+
+solver.maxDepth = 6;
+solver.evaluateFromStack = () => {
+	for(let cnt = 0; cnt < 5000; cnt ++){
+		const item = solver.stack.at(-1);
+		const { turn, move, queue, value, min, max, bestLine, parent } = item;
+		if( ! queue){ // 上から進んできて候補手の生成前
+			const check = model.checkWinner(solver.current.positions);
+			if(check){ 
+				const v = [10000, -10000][check.player];
+				solver.revert(move);
+				if(globalThis.DEBUG){
+					console.groupEnd();
+					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", v);
+				}
+				solver.stack.pop();
+				if(parent.turn == 0 && v > parent.value || parent.turn == 1 && v < parent.value){
+					parent.value = v;
+					parent.bestLine = [move];
+					if(parent.value > parent.max || parent.value < parent.min){
+						//item.queue.flush();
+						parent.queue.flush();
+					}
+				}
+				// TODO: 分岐を整理したい（同じ処理が3個ある）しかもこの処理は parent に属するべきと思われる
+				// min, max ではなく直接 parent?.value や parent?.parent?.value を参照するでも良いかも
+			}
+			else if(solver.stack.length < solver.maxDepth){ // 下に余裕がある（候補手を作成する）
+				if(globalThis.DEBUG){
+					console.log(solver.makePositionString(solver.current.positions));
+					console.log({min, max});
+				}
+				const nextMoves = solver.scanMoves2(solver.current.positions, solver.current.turn,
+					solver.current.history.at(-1), solver.current.history.at(-2)).moves;
+				if(solver.stack.length == 1){
+					for(let m of nextMoves) m.name = solver.makeMoveLineString([m]);
+				}
+				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
+				item.queue = new Util.Queue(nextMoves);
+			}
+			else{ // 下に進めない（静的評価をする）
+				const v = solver.evaluate(solver.current.positions);
+				solver.revert(move);
+				if(globalThis.DEBUG){
+					console.groupEnd();
+					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", v);
+				}
+				solver.stack.pop();
+				if(parent.turn == 0 && v > parent.value || parent.turn == 1 && v < parent.value){
+					parent.value = v;
+					parent.bestLine = [move];
+					if(parent.value > parent.max || parent.value < parent.min){
+						//item.queue.flush();
+						parent.queue.flush();
+					}
+				}
+			}
+		}
+		else if(queue.peek()){ // 未検討の候補手がある状態
+			const move = queue.pop();
+			if(globalThis.DEBUG){
+				console.groupCollapsed("　".repeat(solver.stack.length), solver.stack.length,
+					solver.makeMoveLineString([move]), "[" + move.likeliness + "]");
+			}
+			solver.perform(move);
+			solver.counter += 1;
+			solver.stack.push({
+				turn: 1 - turn, move, queue: null, value: turn ? min : max,
+				min: turn ? min : value, max: turn ? value : max, bestLine, parent: item
+			});
+		}
+		else{ // 候補手の検討が終わった状態
+			if( ! parent){ // 上に戻れない（評価を終了して結果を返す）
+				solver.onEnd(value, bestLine);
+				return;
+			}
+			else{ // 上に戻る
+				if(globalThis.DEBUG){
+					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString(bestLine), ":", value);
+				}
+				solver.revert(move);
+				if(globalThis.DEBUG){
+					console.groupEnd();
+				}
+				solver.stack.pop();
+				if(parent.turn == 0 && value > parent.value || parent.turn == 1 && value < parent.value){
+					parent.value = value;
+					parent.bestLine = [...bestLine, move];
+					if(parent.value > parent.max || parent.value < parent.min){
+						item.queue.flush();
+						parent.queue.flush();
+					}
+				}
+			}
+		}
+	}
+	if(solver.isWorking){
+		solver.onUpdated({
+			counter: solver.counter,
+			move: solver.stack[1]?.move,
+			bestMove: solver.stack[0]?.bestLine?.at(-1),
+			value: solver.stack[0]?.value
+		});
+		window.setTimeout(() => solver.evaluateFromStack(), 0);
+	}
+	else solver.onUpdated({ message: "中断しました。" });
+}
+solver.evaluateRecursive2 = (min, max, lastMove, lastMove2, onEnd) => {
+	if(solver.current.depth == 0 || model.checkWinner(solver.current.positions)){
+		onEnd(solver.evaluate(solver.current.positions), []);
+		return;
+	}
+	const moves = solver.scanMoves2(solver.current.positions, solver.current.turn, lastMove, lastMove2).moves;
+	if(moves.length == 0){
+		onEnd([-10000, 10000][solver.current.turn], []);
+		return;
+	}
+	else{
+		moves.sort((a, b) => b.likeliness - a.likeliness);
+		let value = solver.current.turn ? max : min;
+		let line = [];
+		for(let move of moves){
+			if(solver.current.turn == 0){
+				solver.perform(move);
+				solver.evaluateRecursive2(value, max, move, lastMove, (v, l) => {
+					if(v > value) [value, line] = [v, [...l, move]];
+					solver.revert(move);
+					// if(value > max) queue.clear();
+				});
+			}
+			else{
+				solver.perform(move);
+				solver.evaluateRecursive2(min, value, move, lastMove, (v, l) => {
+					if(v < value) [value, line] = [v, [...l, move]];
+					solver.revert(move);
+					// if(value > max) queue.clear();
+				});
+			}
+		}
+		onEnd(value, line);
+		return;
+	}
+
 }
 solver.evaluateRecursive = (min, max, lastMove = null, lastMove2 = null) => {
 	if(solver.current.depth == 0 || model.checkWinner(solver.current.positions)){
@@ -36,7 +197,7 @@ solver.evaluateRecursive = (min, max, lastMove = null, lastMove2 = null) => {
 						value = v;
 						line = [ ...l, move];
 					}
-					solver.restore(move);
+					solver.revert(move);
 					if(value > max) break;
 				}
 				else{
@@ -46,7 +207,7 @@ solver.evaluateRecursive = (min, max, lastMove = null, lastMove2 = null) => {
 						value = v;
 						line = [ ...l, move];
 					}
-					solver.restore(move);
+					solver.revert(move);
 					if(value < min) break;
 				}
 				// console.log(v);
@@ -59,22 +220,31 @@ solver.evaluateRecursive = (min, max, lastMove = null, lastMove2 = null) => {
 }
 
 
-// position = { x, y, face, player, isOut, isExcluded }
-// move = { main: { piece, newPosition, oldPosition }, captured: { piece, newPosition, oldPosition } | null, likeliness }
+/*
+	position = { x, y, face, player, isOut, isExcluded }
+	move = {
+		main: { piece, newPosition, oldPosition },
+		captured: { piece, newPosition, oldPosition } | null,
+		likeliness,
+		name: string | undefined
+	}
+*/
 
 solver.perform = (move) => {
 	solver.current.turn = 1 - solver.current.turn;
 	solver.current.depth -= 1;
+	solver.current.history.push(move);
 	if(move.main) solver.current.positions[move.main.piece.id] = move.main.newPosition;
 	if(move.captured) solver.current.positions[move.captured.piece.id] = move.captured.newPosition;
 }
-solver.restore = (move) => {
+solver.revert = (/*move*/) => {
 	solver.current.turn = 1 - solver.current.turn;
 	solver.current.depth += 1;
+	const move = solver.current.history.pop(); // TODO: use popped move
 	if(move.main) solver.current.positions[move.main.piece.id] = move.main.oldPosition;
 	if(move.captured) solver.current.positions[move.captured.piece.id] = move.captured.oldPosition;
 }
-solver.makeMoveLineString = (moveLine) => {
+solver.makeMoveLineString = (moveLine) => { // 現在盤面からのラインでないとバグるので注意
 	if( ! moveLine) return "";
 	let moveStrings = [];
 	let cell = null, lastCell = null;
@@ -85,10 +255,23 @@ solver.makeMoveLineString = (moveLine) => {
 		lastCell = cell;
 	}
 	for(move of moveLine){
-		solver.restore(move);
+		solver.revert(move);
 	}
 	return moveStrings.join(" ");
 }
+solver.makePositionString = (positions) => {
+	const grid = [];
+	for(let x = 0; x < model.xSize; x ++){
+		grid.push([]);
+		for(let y = 0; y < model.ySize; y ++) grid.at(-1).push("　");
+	}
+	for(let piece of model.pieces){
+		const pos = positions[piece.id];
+		if( ! pos.isOut) grid[pos.x][pos.y] = piece.entity.shortNames[pos.face].charAt(0);
+	}
+	return grid.map(row => row.join("")).join("\n");
+}
+
 
 solver.calcOccupiers = (positions) => { // FIXME: complexity
 	const occupiers = [];
@@ -167,9 +350,9 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 		move.likeliness +=
 			100 * solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face]
 			- 100 * solver.worthiness[move.main.piece.entity.id][move.main.oldPosition.face];
-		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) move.likeliness += 1000;
-		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id) move.likeliness += 900;
-		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) move.likeliness += 800;
+		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) move.likeliness += 120;
+		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id) move.likeliness += 70;
+		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) move.likeliness += 40;
 	}
 
 	return { moves, counts };
@@ -180,34 +363,8 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 
 solver.isWorking = false;
 solver.solve = (positions, turn, onFound, onUpdated, moveLine = []) => {
-	/*
-	console.log("考えています…");
-	solver.count = 0;
 	solver.isWorking = true;
-	solver.initEvaluation(
-		(item, length) => {
-			if( ! solver.isWorking) return false;
-			if(length == 0){
-				const bestMoveString = solver.makeLineString(solver.rootItem.nextItem);
-				console.log("読み筋 :" + bestMoveString, "(" + solver.rootItem?.value + ") " + solver.count);
-				if(item?.move && (item.turn == 0 && item.value > -5000 || item.turn == 1 && item.value < 5000)){
-					onFound(item.move);
-				}
-				else onFound(null);
-			}
-			else{
-				onUpdated({ move: item?.move, value: item?.value });
-				return true;
-			}
-			return false;
-		},
-		positions,
-		1 - turn,
-		4
-	);
-	*/
-	console.log(moveLine);
-	solver.initEvaluation2(onFound, positions, turn, moveLine.at(-1), moveLine.at(-2));
+	solver.initEvaluation2(onFound, onUpdated, positions, turn, moveLine.at(-2), moveLine.at(-1));
 }
 solver.cancel = () => {
 	console.log("中断しました。");

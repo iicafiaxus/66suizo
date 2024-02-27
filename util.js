@@ -1,7 +1,7 @@
 const Util = {};
 
-Util.Queue = function(){
-	this.array = [];
+Util.Queue = function(items = []){
+	this.array = [...items];
 	this.index = 0;
 }
 Util.Queue.prototype.push = function(item){
@@ -29,6 +29,9 @@ Util.Queue.prototype.getLength = function(){
 }
 Util.Queue.prototype.getHasItem = function(){
 	return this.array.length > this.lndex;
+}
+Util.Queue.prototype.flush = function(){
+	this.index = this.array.length;
 }
 
 // 仮に双方向リストで実装　挿入O(n)、修正O(n)、トップ参照O(1)
