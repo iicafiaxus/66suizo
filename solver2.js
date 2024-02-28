@@ -17,7 +17,7 @@ solver.initEvaluation2 = (onFound, onUpdated, positions, turn, lastMove, lastMov
 	}
 	solver.stack = [{
 		turn, move: {}, queue: null, value: turn ? 10000 : -10000, min: -10000, max: 10000, 
-		bestLine: [], parent: null
+		bestLine: [], parent: null, illness: 0,
 	}];
 	solver.evaluateFromStack();
 }
@@ -31,11 +31,12 @@ TODO
 
 */
 
-solver.maxDepth = 6;
+solver.maxDepth = 5;
+solver.illnessLimit = 3000;
 solver.evaluateFromStack = () => {
 	for(let cnt = 0; cnt < 5000; cnt ++){
 		const item = solver.stack.at(-1);
-		const { turn, move, queue, value, min, max, bestLine, parent } = item;
+		const { turn, move, queue, value, min, max, bestLine, parent, illness } = item;
 		if( ! queue){ // 上から進んできて候補手の生成前
 			const check = model.checkWinner(solver.current.positions);
 			if(check){ 
@@ -47,26 +48,24 @@ solver.evaluateFromStack = () => {
 					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", item.value);
 				}
 				solver.stack.pop();
-				if(parent.turn == 0 && v > parent.value || parent.turn == 1 && v < parent.value){
-					parent.value = v;
-					parent.bestLine = [move];
-					if(parent.value > parent.max || parent.value < parent.min){
-						//item.queue.flush();
-						parent.queue.flush();
-					}
-				}
-				// TODO: 分岐を整理したい（同じ処理が3個ある）しかもこの処理は parent に属するべきと思われる
 				// min, max ではなく直接 parent?.value や parent?.parent?.value を参照するでも良いかも
 			}
-			else if(solver.stack.length < solver.maxDepth){ // 下に余裕がある（候補手を作成する）
+			else if(solver.stack.length < solver.maxDepth && illness < solver.illnessLimit){
+				// 下に余裕がある（候補手を作成する）
 				if(globalThis.DEBUG){
 					console.log(solver.makePositionString(solver.current.positions));
 					console.log({min, max});
 				}
 				const nextMoves = solver.scanMoves2(solver.current.positions, solver.current.turn,
 					solver.current.history.at(-1), solver.current.history.at(-2)).moves;
+				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
+				// TODO: nextMoves.length == 0 だったときの処理
+				const maxLikeliness = nextMoves[0].likeliness;
+				for(let m of nextMoves) m.illness = maxLikeliness - m.likeliness;
 				if(solver.stack.length == 1){
 					for(let m of nextMoves) m.name = solver.makeMoveLineString([m]);
+					console.log("候補手 : " + nextMoves.map(m =>
+						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
 				}
 				item.queue = new Util.Queue(nextMoves);
 				continue;
@@ -80,27 +79,20 @@ solver.evaluateFromStack = () => {
 					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", item.value);
 				}
 				solver.stack.pop();
-				if(parent.turn == 0 && v > parent.value || parent.turn == 1 && v < parent.value){
-					parent.value = v;
-					parent.bestLine = [move];
-					if(parent.value > parent.max || parent.value < parent.min){
-						//item.queue.flush();
-						parent.queue.flush();
-					}
-				}
 			}
 		}
 		else if(queue.peek()){ // 未検討の候補手がある状態
 			const move = queue.pop();
 			if(globalThis.DEBUG){
 				console.groupCollapsed("　".repeat(solver.stack.length), solver.stack.length,
-					solver.makeMoveLineString([move]), "[" + move.likeliness + "]");
+					solver.makeMoveLineString([move]), "[" + move.likeliness + "] " + illness);
 			}
 			solver.perform(move);
 			solver.counter += 1;
 			solver.stack.push({
 				turn: 1 - turn, move, queue: null, value: turn ? min : max,
-				min: turn ? min : value, max: turn ? value : max, bestLine, parent: item
+				min: turn ? min : value, max: turn ? value : max, bestLine, parent: item,
+				illness: illness + move.illness
 			});
 			continue;
 		}
@@ -123,9 +115,9 @@ solver.evaluateFromStack = () => {
 		if(parent?.turn == 0 && item.value > parent.value || parent?.turn == 1 && item.value < parent.value){
 			parent.value = item.value;
 			parent.bestLine = [...item.bestLine, move];
-					if(parent.value > parent.max || parent.value < parent.min){
+			if(parent.value > parent.max || parent.value < parent.min){
 				item.queue?.flush();
-						parent.queue.flush();
+				parent.queue.flush();
 			}
 		}
 	}
