@@ -31,8 +31,8 @@ TODO
 
 */
 
-solver.maxDepth = 5;
-solver.illnessLimit = 3000;
+solver.maxDepth = 6;
+solver.illnessLimit = 1000;
 solver.evaluateFromStack = () => {
 	for(let cnt = 0; cnt < 5000; cnt ++){
 		const item = solver.stack.at(-1);
@@ -278,10 +278,38 @@ solver.calcOccupiers = (positions) => { // FIXME: complexity
 	}
 	return occupiers;
 }
+solver.calcDomination = (positions) => {
+	const occupiers = solver.calcOccupiers(positions);
+	const counts = [[], []];
+	const minWorths = [[], []];
+	const maxWorths = [[], []];
+	for(let turn of [0, 1]) for(let cell of model.cells){
+		counts[turn].push(0);
+		minWorths[turn].push(9999);
+		maxWorths[turn].push(0);
+	}
+	for(let piece of model.pieces){
+		if(positions[piece.id].isExcluded) continue;
+		if(positions[piece.id].isOut) continue;
+		const turn = positions[piece.id].player;
+		const lines = solver.lines[turn][piece.id][positions[piece.id].face]
+			[positions[piece.id].x][positions[piece.id].y];
+		const worth = solver.worthiness[piece.entity.id][positions[piece.id].face];
+		for(let line of lines){
+			for(let cell of line){
+				counts[turn][cell.id] += 1;
+				if(worth > maxWorths[turn][cell.id]) maxWorths[turn][cell.id] = worth;
+				if(worth > minWorths[turn][cell.id]) minWorths[turn][cell.id] = worth;
+				if(occupiers[cell.id]) break;
+			}
+		}
+	}
+	return [counts, minWorths, maxWorths];
+}
 solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 	const moves = [];
-	const counts = [];
-	for(let cell of model.cells) counts[cell.id] = 0;
+	//const counts = [];
+	//for(let cell of model.cells) counts[cell.id] = 0;
 
 	const occupiers = solver.calcOccupiers(positions); // これが piece を返すようにする
 
@@ -317,7 +345,7 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 				positions[piece.id].face][positions[piece.id].x][positions[piece.id].y];
 			for(let line of lines){
 				for(let cell of line){
-					counts[cell.id] += 1;
+					//counts[cell.id] += 1;
 					if(positions[occupiers[cell.id]?.id]?.player == turn) break;
 					const promo = model.checkPromotion(piece, cell, positions);
 					moves.push({
@@ -339,15 +367,43 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 		}
 	}
 
+	const lastX = lastMove.main.newPosition.x;
+	const lastY = lastMove.main.newPosition.y;
+	const [counts, minWorths, maxWorths] = solver.calcDomination(positions);
 	for(let move of moves){
+		// 取る手は＋
 		if(move.captured) move.likeliness +=
 			100 * solver.worthiness[move.captured.piece.entity.id][move.captured.oldPosition.face];
+		// 成る手は＋
 		move.likeliness +=
-			100 * solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face]
-			- 100 * solver.worthiness[move.main.piece.entity.id][move.main.oldPosition.face];
-		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) move.likeliness += 120;
-		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id) move.likeliness += 70;
-		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) move.likeliness += 40;
+			50 * solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face]
+			- 50 * solver.worthiness[move.main.piece.entity.id][move.main.oldPosition.face];
+		// 直前に相手が操作した駒を取るのは少し＋
+		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) move.likeliness += 25;
+		// 直前に自分が操作した駒を動かすのは＋
+		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id) move.likeliness += 60;
+		// 直前に自分が取った駒を打つのは＋
+		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) move.likeliness += 35;
+		// 直前に相手が操作したマスの近くは＋
+		const x = move.main.newPosition.x;
+		const y = move.main.newPosition.y;
+		const z = model.getCell(x, y).id;
+		if(x >= lastX - 1 && x <= lastX + 1 && y >= lastY - 1 && y <= lastY + 1) move.likeliness += 30;
+		// 相手の利きに入る手は－
+		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
+		if(counts[1 - turn][z] > counts[turn][z] - (move.main.oldPosition.isOut ? 0 : 1))
+			move.likeliness -= 90 * worth;
+		// 相手の安い駒に取られる手は－
+		if(minWorths[1 - turn][z] < worth) move.likeliness -= 70 * (worth - minWorths[1 - turn][z]);
+		// 相手の安い駒に取られそうだった駒を動かす手は＋
+		const xo = move.main.oldPosition.x;
+		const yo = move.main.oldPosition.y;
+		const zo = model.getCell(xo, yo)?.id;
+		if( ! move.main.oldPosition.isout && minWorths[1 - turn][zo] < worth)
+			move.likeliness += 50 * (worth - minWorths[1 - turn][zo]);
+		// TODO: 増やす（増やしたら打ち切りのしきい値も調整する）
+		// 相手の駒に利きを与える手は＋
+		
 	}
 
 	return { moves, counts };
