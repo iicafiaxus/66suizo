@@ -39,11 +39,12 @@ solver.evaluateFromStack = () => {
 		if( ! queue){ // 上から進んできて候補手の生成前
 			const check = model.checkWinner(solver.current.positions);
 			if(check){ 
-				const v = [10000, -10000][check.player];
+				item.value = [10000, -10000][check.player];
+				item.bestLine = [];
 				solver.revert(move);
 				if(globalThis.DEBUG){
 					console.groupEnd();
-					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", v);
+					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", item.value);
 				}
 				solver.stack.pop();
 				if(parent.turn == 0 && v > parent.value || parent.turn == 1 && v < parent.value){
@@ -67,15 +68,16 @@ solver.evaluateFromStack = () => {
 				if(solver.stack.length == 1){
 					for(let m of nextMoves) m.name = solver.makeMoveLineString([m]);
 				}
-				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
 				item.queue = new Util.Queue(nextMoves);
+				continue;
 			}
 			else{ // 下に進めない（静的評価をする）
-				const v = solver.evaluate(solver.current.positions);
+				item.value = solver.evaluate(solver.current.positions);
+				item.bestLine = [];
 				solver.revert(move);
 				if(globalThis.DEBUG){
 					console.groupEnd();
-					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", v);
+					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", item.value);
 				}
 				solver.stack.pop();
 				if(parent.turn == 0 && v > parent.value || parent.turn == 1 && v < parent.value){
@@ -100,6 +102,7 @@ solver.evaluateFromStack = () => {
 				turn: 1 - turn, move, queue: null, value: turn ? min : max,
 				min: turn ? min : value, max: turn ? value : max, bestLine, parent: item
 			});
+			continue;
 		}
 		else{ // 候補手の検討が終わった状態
 			if( ! parent){ // 上に戻れない（評価を終了して結果を返す）
@@ -115,14 +118,14 @@ solver.evaluateFromStack = () => {
 					console.groupEnd();
 				}
 				solver.stack.pop();
-				if(parent.turn == 0 && value > parent.value || parent.turn == 1 && value < parent.value){
-					parent.value = value;
-					parent.bestLine = [...bestLine, move];
+			}
+		}
+		if(parent?.turn == 0 && item.value > parent.value || parent?.turn == 1 && item.value < parent.value){
+			parent.value = item.value;
+			parent.bestLine = [...item.bestLine, move];
 					if(parent.value > parent.max || parent.value < parent.min){
-						item.queue.flush();
+				item.queue?.flush();
 						parent.queue.flush();
-					}
-				}
 			}
 		}
 	}
