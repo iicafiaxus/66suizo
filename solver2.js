@@ -26,6 +26,7 @@ solver.initEvaluation2 = (onFound, onUpdated, positions, turn, lastMove, lastMov
 /*
 TODO
 ・劣後度（優先度トップとの差）の累積が大きい手は無視する（捨てる手のとき）
+　※現状は捨てる手のときでなくても打ち切って静的評価をしている
 
 ・initEvaluation2等の引数を見直す
 
@@ -35,6 +36,7 @@ solver.minDepth = 3;
 solver.maxDepth = 10;
 solver.illnessLimit = 1800;
 solver.illnessCost = 300;
+solver.counterLimit = 2000000; // 超えるとillnessの増加量が2倍になる
 solver.evaluateFromStack = () => {
 	for(let cnt = 0; cnt < 5000; cnt ++){
 		const item = solver.stack.at(-1);
@@ -95,7 +97,7 @@ solver.evaluateFromStack = () => {
 			solver.stack.push({
 				turn: 1 - turn, move, queue: null, value: turn ? min : max,
 				min: turn ? min : value, max: turn ? value : max, bestLine, parent: item,
-				illness: illness + move.illness + solver.illnessCost
+				illness: illness + (move.illness + solver.illnessCost) * (solver.counter > solver.counterLimit ? 2 : 1)
 			});
 			continue;
 		}
@@ -302,7 +304,7 @@ solver.calcDomination = (positions) => {
 			for(let cell of line){
 				counts[turn][cell.id] += 1;
 				if(worth > maxWorths[turn][cell.id]) maxWorths[turn][cell.id] = worth;
-				if(worth > minWorths[turn][cell.id]) minWorths[turn][cell.id] = worth;
+				if(worth < minWorths[turn][cell.id]) minWorths[turn][cell.id] = worth;
 				if(occupiers[cell.id]) break;
 			}
 		}
@@ -374,39 +376,42 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 	const lastY = lastMove?.main?.newPosition?.y;
 	const [counts, minWorths, maxWorths] = solver.calcDomination(positions);
 	for(let move of moves){
-		// 取る手は＋
-		if(move.captured) move.likeliness +=
-			100 * solver.worthiness[move.captured.piece.entity.id][move.captured.oldPosition.face];
-		// 成る手は＋
-		move.likeliness +=
-			50 * solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face]
-			- 50 * solver.worthiness[move.main.piece.entity.id][move.main.oldPosition.face];
-		// 直前に相手が操作した駒を取るのは少し＋
-		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) move.likeliness += 25;
-		// 直前に自分が操作した駒を動かすのは＋
-		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id) move.likeliness += 60;
-		// 直前に自分が取った駒を打つのは＋
-		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) move.likeliness += 35;
-		// 直前に相手が操作したマスの近くは＋
+		let l = 0;
+		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
+		const oldWorth = solver.worthiness[move.main.piece.entity.id][move.main.oldPosition.face];
+		const captureWorth = move.captured ? solver.worthiness[move.captured.piece.entity.id][move.captured.oldPosition.face] : 0;
 		const x = move.main.newPosition.x;
 		const y = move.main.newPosition.y;
 		const z = model.getCell(x, y).id;
-		if(x >= lastX - 1 && x <= lastX + 1 && y >= lastY - 1 && y <= lastY + 1) move.likeliness += 30;
-		// 相手の利きに入る手は－
-		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
-		if(counts[1 - turn][z] > counts[turn][z] - (move.main.oldPosition.isOut ? 0 : 1))
-			move.likeliness -= 90 * worth;
-		// 相手の安い駒に取られる手は－
-		if(minWorths[1 - turn][z] < worth) move.likeliness -= 70 * (worth - minWorths[1 - turn][z]);
-		// 相手の安い駒に取られそうだった駒を動かす手は＋
+		const dominationCount = move.main.oldPosition.isOut ? counts[turn][z] : (counts[turn][z] - 1);
 		const xo = move.main.oldPosition.x;
 		const yo = move.main.oldPosition.y;
 		const zo = model.getCell(xo, yo)?.id;
-		if( ! move.main.oldPosition.isout && minWorths[1 - turn][zo] < worth)
-			move.likeliness += 50 * (worth - minWorths[1 - turn][zo]);
+		// 取る手は＋
+		l += 100 * captureWorth;
+		// 成る手は＋
+		l += 50 * (worth - oldWorth);
+		// 直前に相手が操作した駒を取るのは少し＋
+		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) l += 25;
+		// 直前に自分が操作した駒を動かすのは＋　ただし手を戻すのは－
+		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id){
+			if(lastMove2.main.oldPosition.x == x && lastMove2.main.oldPosition.y == y) l -= 60;
+			else l += 60;
+		}
+		// 直前に自分が取った駒を打つのは＋
+		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) l += 35;
+		// 直前に相手が操作したマスの近くは＋
+		if(x >= lastX - 1 && x <= lastX + 1 && y >= lastY - 1 && y <= lastY + 1) l += 30;
+		// 自分の利きがなく相手の利きがある場所へ入る手は－
+		if(dominationCount == 0 && counts[1 - turn][z] > 0) l -= 90 * worth;
+		// 自分と相手の利きがある場所へ入る手は，相手の駒のほうが安ければ－
+		if(dominationCount > 0 && counts[1 - turn][z] > 0 && minWorths[1 - turn][z] < worth) l -= 70 * worth;
+		// 相手の安い駒に取られそうだった駒を動かす手は＋
+		if( ! move.main.oldPosition.isOut && minWorths[1 - turn][zo] < worth) l += 50 * (worth - minWorths[1 - turn][zo]);
 		// TODO: 増やす（増やしたら打ち切りのしきい値も調整する）
 		// 相手の駒に利きを与える手は＋
 		
+		move.likeliness = l;
 	}
 
 	return { moves, counts };
