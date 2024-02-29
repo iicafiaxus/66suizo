@@ -31,8 +31,10 @@ TODO
 
 */
 
-solver.maxDepth = 6;
-solver.illnessLimit = 1000;
+solver.minDepth = 3;
+solver.maxDepth = 10;
+solver.illnessLimit = 1800;
+solver.illnessCost = 300;
 solver.evaluateFromStack = () => {
 	for(let cnt = 0; cnt < 5000; cnt ++){
 		const item = solver.stack.at(-1);
@@ -50,7 +52,8 @@ solver.evaluateFromStack = () => {
 				solver.stack.pop();
 				// min, max ではなく直接 parent?.value や parent?.parent?.value を参照するでも良いかも
 			}
-			else if(solver.stack.length < solver.maxDepth && illness < solver.illnessLimit){
+			else if(solver.stack.length < solver.minDepth ||
+				solver.stack.length < solver.maxDepth && illness < solver.illnessLimit){
 				// 下に余裕がある（候補手を作成する）
 				if(globalThis.DEBUG){
 					console.log(solver.makePositionString(solver.current.positions));
@@ -92,7 +95,7 @@ solver.evaluateFromStack = () => {
 			solver.stack.push({
 				turn: 1 - turn, move, queue: null, value: turn ? min : max,
 				min: turn ? min : value, max: turn ? value : max, bestLine, parent: item,
-				illness: illness + move.illness
+				illness: illness + move.illness + solver.illnessCost
 			});
 			continue;
 		}
