@@ -367,8 +367,8 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 		}
 	}
 
-	const lastX = lastMove.main.newPosition.x;
-	const lastY = lastMove.main.newPosition.y;
+	const lastX = lastMove?.main?.newPosition?.x;
+	const lastY = lastMove?.main?.newPosition?.y;
 	const [counts, minWorths, maxWorths] = solver.calcDomination(positions);
 	for(let move of moves){
 		// 取る手は＋
