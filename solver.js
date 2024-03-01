@@ -32,7 +32,7 @@ for(let player of [0, 1]){
 }
 
 solver.current = null;
-solver.initEvaluation2 = (onFound, onUpdated, positions, turn, lastMove, lastMove2, depth = 4) => {
+solver.initEvaluation = (onFound, onUpdated, positions, turn, lastMove, lastMove2, depth = 4) => {
 	solver.current = { positions, turn, depth, bestMoveLine: [], history: [lastMove, lastMove2] };
 	solver.counter = 0;
 	console.log(solver.makePositionString(solver.current.positions));
@@ -57,7 +57,7 @@ TODO
 ・劣後度（優先度トップとの差）の累積が大きい手は無視する（捨てる手のとき）
 　※現状は捨てる手のときでなくても打ち切って静的評価をしている
 
-・initEvaluation2等の引数を見直す
+・initEvaluation等の引数を見直す
 
 */
 
@@ -90,7 +90,7 @@ solver.evaluateFromStack = () => {
 					console.log(solver.makePositionString(solver.current.positions));
 					console.log({min, max});
 				}
-				const nextMoves = solver.scanMoves2(solver.current.positions, solver.current.turn,
+				const nextMoves = solver.scanMoves(solver.current.positions, solver.current.turn,
 					solver.current.history.at(-1), solver.current.history.at(-2)).moves;
 				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
 				// TODO: nextMoves.length == 0 だったときの処理
@@ -258,7 +258,7 @@ solver.calcDomination = (positions) => {
 	}
 	return [counts, minWorths, maxWorths];
 }
-solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
+solver.scanMoves = (positions, turn, lastMove, lastMove2) => {
 	const moves = [];
 	//const counts = [];
 	//for(let cell of model.cells) counts[cell.id] = 0;
@@ -404,7 +404,7 @@ solver.evaluate = (positions) => {
 solver.isWorking = false;
 solver.solve = (positions, turn, onFound, onUpdated, moveLine = []) => {
 	solver.isWorking = true;
-	solver.initEvaluation2(onFound, onUpdated, positions, turn, moveLine.at(-2), moveLine.at(-1));
+	solver.initEvaluation(onFound, onUpdated, positions, turn, moveLine.at(-2), moveLine.at(-1));
 }
 solver.cancel = () => {
 	console.log("中断しました。");
