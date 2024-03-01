@@ -33,7 +33,6 @@ solver.initEvaluation = (onFound, onUpdated, positions, turn, history) => {
 	}];
 	solver.evaluateFromStack();
 }
-// stackItem: { queue: Util.Queue(move), value, min, max, history };
 
 /*
 TODO

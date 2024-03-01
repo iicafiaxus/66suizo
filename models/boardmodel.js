@@ -1,6 +1,5 @@
 "REQUIRE models/model.js";
 
-// TODO: これも将棋のルールの一部
 model.lines = [];
 for(let player of [0, 1]){
 	model.lines[player] = [];
@@ -87,8 +86,6 @@ BoardState.prototype.makeMoveLineString = function(moveLine){ // moveLine は直
 BoardState.prototype.scanMoves = function(){
 	const moves = [];
 
-	//const occupiers = this.calcOccupiers(); // これが piece を返すようにする
-
 	const isUsed = [];
 	for(let piece of model.pieces){
 		if(this.positions[piece.id].player != this.turn) continue;
@@ -122,7 +119,6 @@ BoardState.prototype.scanMoves = function(){
 				this.positions[piece.id].face][this.positions[piece.id].x][this.positions[piece.id].y];
 			for(let line of lines){
 				for(let cell of line){
-					//counts[cell.id] += 1;
 					if(this.positions[this.occupiers[cell.id]?.id]?.player == this.turn) break;
 					const promo = model.checkPromotion(piece, cell, this.positions);
 					moves.push({
@@ -147,8 +143,6 @@ BoardState.prototype.scanMoves = function(){
 	}
 	return moves;
 }
-
-
 
 BoardState.prototype.makePositionString = function(){
 	const grid = [];
