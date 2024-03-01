@@ -6,8 +6,8 @@ const solver = {};
 
 
 solver.current = null;
-solver.initEvaluation = (onFound, onUpdated, positions, turn, lastMove, lastMove2, depth = 4) => {
-	solver.current = { positions, turn, depth, bestMoveLine: [], history: [lastMove, lastMove2] };
+solver.initEvaluation = (onFound, onUpdated, positions, turn, lastMove, lastMove2) => {
+	solver.current = { positions, turn, history: [lastMove, lastMove2] };
 	solver.counter = 0;
 	console.log(solver.makePositionString(solver.current.positions));
 	solver.onEnd = (value, moveLine) => {
@@ -30,8 +30,6 @@ solver.initEvaluation = (onFound, onUpdated, positions, turn, lastMove, lastMove
 TODO
 ・劣後度（優先度トップとの差）の累積が大きい手は無視する（捨てる手のとき）
 　※現状は捨てる手のときでなくても打ち切って静的評価をしている
-
-・initEvaluation等の引数を見直す
 
 */
 
@@ -155,14 +153,12 @@ solver.evaluateFromStack = () => {
 
 solver.perform = (move) => {
 	solver.current.turn = 1 - solver.current.turn;
-	solver.current.depth -= 1;
 	solver.current.history.push(move);
 	if(move.main) solver.current.positions[move.main.piece.id] = move.main.newPosition;
 	if(move.captured) solver.current.positions[move.captured.piece.id] = move.captured.newPosition;
 }
 solver.revert = (/*move*/) => {
 	solver.current.turn = 1 - solver.current.turn;
-	solver.current.depth += 1;
 	const move = solver.current.history.pop(); // TODO: use popped move
 	if(move.main) solver.current.positions[move.main.piece.id] = move.main.oldPosition;
 	if(move.captured) solver.current.positions[move.captured.piece.id] = move.captured.oldPosition;
