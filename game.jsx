@@ -2,7 +2,6 @@
 "REQUIRE piece.jsx";
 "REQUIRE board.jsx";
 "REQUIRE models/model.js";
-"REQUIRE solver.js";
 "REQUIRE solver2.js";
 
 const Game = function(props){

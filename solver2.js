@@ -1,6 +1,35 @@
 "REQUIRE models/model.js";
 "REQUIRE util.js";
-"REQUIRE solver.js";
+
+const solver = {};
+
+// TODO: これも将棋のルールの一部
+solver.lines = [];
+for(let player of [0, 1]){
+	solver.lines[player] = [];
+	for(let piece of model.pieces){
+		solver.lines[player][piece.id] = [];
+		for(let face of [0, 1]){
+			solver.lines[player][piece.id][face] = [];
+			for(let cell0 of model.cells){
+				if( ! solver.lines[player][piece.id][face][cell0.x])  solver.lines[player][piece.id][face][cell0.x] = [];
+				solver.lines[player][piece.id][face][cell0.x][cell0.y] = [];
+				const lines = piece.entity.lines[face];
+				for(let line of lines){
+					const cells = [];
+					for(let t of line){
+						const x1 = cell0.x + t.dx * [1, -1][player];
+						const y1 = cell0.y + t.dy * [1, -1][player];
+						for(let cell of model.cells){
+							if(x1 == cell.x && y1 == cell.y) cells.push(cell);
+						}
+					}
+					solver.lines[player][piece.id][face][cell0.x][cell0.y].push(cells);
+				}
+			}
+		}
+	}
+}
 
 solver.current = null;
 solver.initEvaluation2 = (onFound, onUpdated, positions, turn, lastMove, lastMove2, depth = 4) => {
@@ -372,6 +401,8 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 		}
 	}
 
+	// TODO: ここまでは将棋のルール，ここからはsolverの判断なのでファイルを分ける
+
 	const lastX = lastMove?.main?.newPosition?.x;
 	const lastY = lastMove?.main?.newPosition?.y;
 	const [counts, minWorths, maxWorths] = solver.calcDomination(positions);
@@ -415,6 +446,38 @@ solver.scanMoves2 = (positions, turn, lastMove, lastMove2) => {
 	}
 
 	return { moves, counts };
+}
+
+solver.worthiness = [
+	[10, 0], // king
+	[8, 10], // queen
+	[4, 6], // rook
+	[4, 6], // bishop
+	[3, 4], // silver
+	[1, 4], // pawn
+];
+
+solver.evaluationCounter = 0;
+solver.evaluate = (positions) => {
+	const winner = model.checkWinner(positions);
+	if(winner){
+		if(winner.player == 0) return 10000; else return -10000;
+	}
+	const [counts] = solver.calcDomination(positions);
+
+	let value = 0;
+	for(let c of model.cells){
+		if(counts[0][c.id] > counts[1][c.id]) value += 100;
+		else if(counts[0][c.id] < counts[1][c.id]) value -= 100.;
+	}
+	for(let p of model.pieces){
+		if(positions[p.id].isExcluded) continue;
+		if(positions[p.id].player == 0) value += 100 * solver.worthiness[p.entity.id][positions[p.id].face];
+		else value -= 100 * solver.worthiness[p.entity.id][positions[p.id].face];
+	}
+
+	solver.evaluationCounter += 1;
+	return value;
 }
 
 
