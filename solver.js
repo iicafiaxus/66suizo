@@ -1,35 +1,9 @@
 "REQUIRE models/model.js";
+"REQUIRE models/boardmodel.js";
 "REQUIRE util.js";
 
 const solver = {};
 
-// TODO: これも将棋のルールの一部
-solver.lines = [];
-for(let player of [0, 1]){
-	solver.lines[player] = [];
-	for(let piece of model.pieces){
-		solver.lines[player][piece.id] = [];
-		for(let face of [0, 1]){
-			solver.lines[player][piece.id][face] = [];
-			for(let cell0 of model.cells){
-				if( ! solver.lines[player][piece.id][face][cell0.x])  solver.lines[player][piece.id][face][cell0.x] = [];
-				solver.lines[player][piece.id][face][cell0.x][cell0.y] = [];
-				const lines = piece.entity.lines[face];
-				for(let line of lines){
-					const cells = [];
-					for(let t of line){
-						const x1 = cell0.x + t.dx * [1, -1][player];
-						const y1 = cell0.y + t.dy * [1, -1][player];
-						for(let cell of model.cells){
-							if(x1 == cell.x && y1 == cell.y) cells.push(cell);
-						}
-					}
-					solver.lines[player][piece.id][face][cell0.x][cell0.y].push(cells);
-				}
-			}
-		}
-	}
-}
 
 solver.current = null;
 solver.initEvaluation = (onFound, onUpdated, positions, turn, lastMove, lastMove2, depth = 4) => {
@@ -90,8 +64,10 @@ solver.evaluateFromStack = () => {
 					console.log(solver.makePositionString(solver.current.positions));
 					console.log({min, max});
 				}
-				const nextMoves = solver.scanMoves(solver.current.positions, solver.current.turn,
-					solver.current.history.at(-1), solver.current.history.at(-2)).moves;
+				const nextMoves = model.scanMoves(solver.current.positions, solver.current.turn);
+				solver.calcLikeliness(nextMoves, 
+					solver.current.positions, solver.current.turn,
+					solver.current.history.at(-1), solver.current.history.at(-2));
 				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
 				// TODO: nextMoves.length == 0 だったときの処理
 				const maxLikeliness = nextMoves[0].likeliness;
@@ -220,18 +196,9 @@ solver.makePositionString = (positions) => {
 }
 
 
-solver.calcOccupiers = (positions) => { // FIXME: complexity
-	const occupiers = [];
-	for(let piece of model.pieces){
-		const pos = positions[piece.id];
-		if(pos.isOut) continue;
-		if(pos.isExcluded) continue;
-		occupiers[model.getCell(pos.x, pos.y).id] = piece;
-	}
-	return occupiers;
-}
+
 solver.calcDomination = (positions) => {
-	const occupiers = solver.calcOccupiers(positions);
+	const occupiers = model.calcOccupiers(positions);
 	const counts = [[], []];
 	const minWorths = [[], []];
 	const maxWorths = [[], []];
@@ -244,7 +211,7 @@ solver.calcDomination = (positions) => {
 		if(positions[piece.id].isExcluded) continue;
 		if(positions[piece.id].isOut) continue;
 		const turn = positions[piece.id].player;
-		const lines = solver.lines[turn][piece.id][positions[piece.id].face]
+		const lines = model.lines[turn][piece.id][positions[piece.id].face]
 			[positions[piece.id].x][positions[piece.id].y];
 		const worth = solver.worthiness[piece.entity.id][positions[piece.id].face];
 		for(let line of lines){
@@ -258,69 +225,8 @@ solver.calcDomination = (positions) => {
 	}
 	return [counts, minWorths, maxWorths];
 }
-solver.scanMoves = (positions, turn, lastMove, lastMove2) => {
-	const moves = [];
-	//const counts = [];
-	//for(let cell of model.cells) counts[cell.id] = 0;
-
-	const occupiers = solver.calcOccupiers(positions); // これが piece を返すようにする
-
-	const isUsed = [];
-	for(let piece of model.pieces){
-		if(positions[piece.id].player != turn) continue;
-		if(positions[piece.id].isExcluded) continue;
-		if(positions[piece.id].isOut){
-			if(isUsed[piece.entity.id]) continue;
-			isUsed[piece.entity.id] = true;
-			for(let cell of model.cells){
-				if(occupiers[cell.id]) continue;
-				if(turn == 0 && cell.x < piece.entity.forcePromotion) continue;
-				if(turn == 1 && cell.x > 5 - piece.entity.forcePromotion) continue;
-				if(piece.entity.occupiesColumn){
-					if(model.pieces.find(p => 
-						positions[p.id].y == cell.y && positions[p.id].player == turn &&
-						p.entity == piece.entity && positions[p.id].face == 0
-					)) continue;
-				}
-				moves.push({
-					main: {
-						piece,
-						newPosition: { x: cell.x, y: cell.y, face: 0, player: turn, isOut: false, isExcluded: false },
-						oldPosition: positions[piece.id],
-					},
-					likeliness: 0,
-				});
-			}
-		}
-		else{
-			const lines = solver.lines[turn][piece.id][
-				positions[piece.id].face][positions[piece.id].x][positions[piece.id].y];
-			for(let line of lines){
-				for(let cell of line){
-					//counts[cell.id] += 1;
-					if(positions[occupiers[cell.id]?.id]?.player == turn) break;
-					const promo = model.checkPromotion(piece, cell, positions);
-					moves.push({
-						main: {
-							piece,
-							newPosition: { x: cell.x, y: cell.y, face: (promo[1] ? 1 : 0), player: turn, isOut: false, isExcluded: false },
-							oldPosition: positions[piece.id],
-						},
-						captured: occupiers[cell.id] ? {
-							piece: occupiers[cell.id],
-							newPosition: { x: 0, y: 0, face: 0, player: turn, isOut: true, isExcluded: occupiers[cell.id].entity.isSingleUse },
-							oldPosition: positions[occupiers[cell.id].id],
-						} : null,
-						likeliness: 0,
-					});
-					if(occupiers[cell.id]) break;
-				}
-			}
-		}
-	}
-
-	// TODO: ここまでは将棋のルール，ここからはsolverの判断なのでファイルを分ける
-
+solver.calcLikeliness = (moves, positions, turn, lastMove, lastMove2) => {
+	// moves の要素である move に likeliness を書き込む
 	const lastX = lastMove?.main?.newPosition?.x;
 	const lastY = lastMove?.main?.newPosition?.y;
 	const [counts, minWorths, maxWorths] = solver.calcDomination(positions);
@@ -362,8 +268,6 @@ solver.scanMoves = (positions, turn, lastMove, lastMove2) => {
 		
 		move.likeliness = l;
 	}
-
-	return { moves, counts };
 }
 
 solver.worthiness = [
