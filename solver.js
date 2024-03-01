@@ -4,14 +4,23 @@
 
 const solver = {};
 
+solver.isWorking = false;
+solver.solve = (positions, turn, onFound, onUpdated, history = []) => {
+	solver.isWorking = true;
+	solver.initEvaluation(onFound, onUpdated, positions, turn, history);
+}
+solver.cancel = () => {
+	console.log("中断しました。");
+	solver.isWorking = false;
+}
 
 solver.current = null;
-solver.initEvaluation = (onFound, onUpdated, positions, turn, lastMove, lastMove2) => {
-	solver.current = { positions, turn, history: [lastMove, lastMove2] };
+solver.initEvaluation = (onFound, onUpdated, positions, turn, history) => {
+	solver.current = new BoardState(positions, turn, history);
 	solver.counter = 0;
-	console.log(solver.makePositionString(solver.current.positions));
+	console.log(solver.current.makePositionString());
 	solver.onEnd = (value, moveLine) => {
-		console.log("読み筋 : " + solver.makeMoveLineString(moveLine) + " (" + value + ")");
+		console.log("読み筋 : " + solver.current.makeMoveLineString(moveLine) + " (" + value + ")");
 		solver.isWorking = false;
 		onFound(moveLine && moveLine.at(-1));
 	};
@@ -47,10 +56,11 @@ solver.evaluateFromStack = () => {
 			if(check){ 
 				item.value = [10000, -10000][check.player];
 				item.bestLine = [];
-				solver.revert(move);
+				solver.current.revert();
 				if(globalThis.DEBUG){
 					console.groupEnd();
-					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", item.value);
+					console.log("　".repeat(solver.stack.length),
+						solver.current.makeMoveLineString([move]), ":", item.value);
 				}
 				solver.stack.pop();
 				// min, max ではなく直接 parent?.value や parent?.parent?.value を参照するでも良いかも
@@ -59,19 +69,19 @@ solver.evaluateFromStack = () => {
 				solver.stack.length < solver.maxDepth && illness < solver.illnessLimit){
 				// 下に余裕がある（候補手を作成する）
 				if(globalThis.DEBUG){
-					console.log(solver.makePositionString(solver.current.positions));
+					console.log(solver.current.makePositionString());
 					console.log({min, max});
 				}
-				const nextMoves = model.scanMoves(solver.current.positions, solver.current.turn);
+				const nextMoves = solver.current.scanMoves();
 				solver.calcLikeliness(nextMoves, 
-					solver.current.positions, solver.current.turn,
+					solver.current.positions, solver.current.turn, solver.current.occupiers,
 					solver.current.history.at(-1), solver.current.history.at(-2));
 				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
 				// TODO: nextMoves.length == 0 だったときの処理
 				const maxLikeliness = nextMoves[0].likeliness;
 				for(let m of nextMoves) m.illness = maxLikeliness - m.likeliness;
 				if(solver.stack.length == 1){
-					for(let m of nextMoves) m.name = solver.makeMoveLineString([m]);
+					for(let m of nextMoves) m.name = solver.current.makeMoveLineString([m]);
 					console.log("候補手 : " + nextMoves.map(m =>
 						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
 				}
@@ -79,12 +89,13 @@ solver.evaluateFromStack = () => {
 				continue;
 			}
 			else{ // 下に進めない（静的評価をする）
-				item.value = solver.evaluate(solver.current.positions);
+				item.value = solver.evaluate(solver.current.positions, solver.current.occupiers);
 				item.bestLine = [];
-				solver.revert(move);
+				solver.current.revert();
 				if(globalThis.DEBUG){
 					console.groupEnd();
-					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString([move]), ":", item.value);
+					console.log("　".repeat(solver.stack.length),
+						solver.current.makeMoveLineString([move]), ":", item.value);
 				}
 				solver.stack.pop();
 			}
@@ -93,9 +104,9 @@ solver.evaluateFromStack = () => {
 			const move = queue.pop();
 			if(globalThis.DEBUG){
 				console.groupCollapsed("　".repeat(solver.stack.length), solver.stack.length,
-					solver.makeMoveLineString([move]), "[" + move.likeliness + "] " + illness);
+					solver.current.makeMoveLineString([move]), "[" + move.likeliness + "] " + illness);
 			}
-			solver.perform(move);
+			solver.current.perform(move);
 			solver.counter += 1;
 			solver.stack.push({
 				turn: 1 - turn, move, queue: null, value: turn ? min : max,
@@ -111,9 +122,10 @@ solver.evaluateFromStack = () => {
 			}
 			else{ // 上に戻る
 				if(globalThis.DEBUG){
-					console.log("　".repeat(solver.stack.length), solver.makeMoveLineString(bestLine), ":", value);
+					console.log("　".repeat(solver.stack.length),
+						solver.current.makeMoveLineString(bestLine), ":", value);
 				}
-				solver.revert(move);
+				solver.current.revert();
 				if(globalThis.DEBUG){
 					console.groupEnd();
 				}
@@ -151,50 +163,7 @@ solver.evaluateFromStack = () => {
 	}
 */
 
-solver.perform = (move) => {
-	solver.current.turn = 1 - solver.current.turn;
-	solver.current.history.push(move);
-	if(move.main) solver.current.positions[move.main.piece.id] = move.main.newPosition;
-	if(move.captured) solver.current.positions[move.captured.piece.id] = move.captured.newPosition;
-}
-solver.revert = (/*move*/) => {
-	solver.current.turn = 1 - solver.current.turn;
-	const move = solver.current.history.pop(); // TODO: use popped move
-	if(move.main) solver.current.positions[move.main.piece.id] = move.main.oldPosition;
-	if(move.captured) solver.current.positions[move.captured.piece.id] = move.captured.oldPosition;
-}
-solver.makeMoveLineString = (moveLine) => { // 現在盤面からのラインでないとバグるので注意
-	if( ! moveLine) return "";
-	let moveStrings = [];
-	let cell = null, lastCell = null;
-	for(move of moveLine.toReversed()){
-		cell = model.getCell(move.main.newPosition.x, move.main.newPosition.y);
-		moveStrings.push(model.makeMoveString(move.main.piece, cell, solver.current.positions, move.main.newPosition.face, lastCell));
-		solver.perform(move);
-		lastCell = cell;
-	}
-	for(move of moveLine){
-		solver.revert(move);
-	}
-	return moveStrings.join(" ");
-}
-solver.makePositionString = (positions) => {
-	const grid = [];
-	for(let x = 0; x < model.xSize; x ++){
-		grid.push([]);
-		for(let y = 0; y < model.ySize; y ++) grid.at(-1).push("　");
-	}
-	for(let piece of model.pieces){
-		const pos = positions[piece.id];
-		if( ! pos.isOut) grid[pos.x][pos.y] = piece.entity.shortNames[pos.face].charAt(0);
-	}
-	return grid.map(row => row.join("")).join("\n");
-}
-
-
-
-solver.calcDomination = (positions) => {
-	const occupiers = model.calcOccupiers(positions);
+solver.calcDomination = (positions, occupiers) => {
 	const counts = [[], []];
 	const minWorths = [[], []];
 	const maxWorths = [[], []];
@@ -221,11 +190,11 @@ solver.calcDomination = (positions) => {
 	}
 	return [counts, minWorths, maxWorths];
 }
-solver.calcLikeliness = (moves, positions, turn, lastMove, lastMove2) => {
+solver.calcLikeliness = (moves, positions, turn, occupiers, lastMove, lastMove2) => {
 	// moves の要素である move に likeliness を書き込む
 	const lastX = lastMove?.main?.newPosition?.x;
 	const lastY = lastMove?.main?.newPosition?.y;
-	const [counts, minWorths, maxWorths] = solver.calcDomination(positions);
+	const [counts, minWorths, maxWorths] = solver.calcDomination(positions, occupiers);
 	for(let move of moves){
 		let l = 0;
 		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
@@ -235,6 +204,7 @@ solver.calcLikeliness = (moves, positions, turn, lastMove, lastMove2) => {
 		const y = move.main.newPosition.y;
 		const z = model.getCell(x, y).id;
 		const dominationCount = move.main.oldPosition.isOut ? counts[turn][z] : (counts[turn][z] - 1);
+			// FIXME: 飛車先の歩を突いたような場面でカウントが正しくない
 		const xo = move.main.oldPosition.x;
 		const yo = move.main.oldPosition.y;
 		const zo = model.getCell(xo, yo)?.id;
@@ -276,12 +246,12 @@ solver.worthiness = [
 ];
 
 solver.evaluationCounter = 0;
-solver.evaluate = (positions) => {
+solver.evaluate = (positions, occupiers) => {
 	const winner = model.checkWinner(positions);
 	if(winner){
 		if(winner.player == 0) return 10000; else return -10000;
 	}
-	const [counts] = solver.calcDomination(positions);
+	const [counts] = solver.calcDomination(positions, occupiers);
 
 	let value = 0;
 	for(let c of model.cells){
@@ -300,13 +270,3 @@ solver.evaluate = (positions) => {
 
 
 
-
-solver.isWorking = false;
-solver.solve = (positions, turn, onFound, onUpdated, moveLine = []) => {
-	solver.isWorking = true;
-	solver.initEvaluation(onFound, onUpdated, positions, turn, moveLine.at(-2), moveLine.at(-1));
-}
-solver.cancel = () => {
-	console.log("中断しました。");
-	solver.isWorking = false;
-}
