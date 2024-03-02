@@ -40,31 +40,58 @@ const BoardState = function(positions, turn, history){
 		if(pos.isExcluded) continue;
 		this.occupiers[model.getCell(pos.x, pos.y).id] = piece;
 	}
+
+	this.lives = [0, 0];
+	for(let piece of model.pieces){
+		const pos = positions[piece.id];
+		if( ! pos.isOut && ! pos.isExcluded){
+			this.lives[pos.player] += piece.entity.life[pos.face];
+		}
+	}
+}
+BoardState.prototype.getWinner = function(){
+	return this.lives[0] ? this.lives[1] ? -1 : 0 : 1;
 }
 BoardState.prototype.perform = function(move){
-	this.turn = 1 - this.turn;
 	this.history.push(move);
 	if(move.main){
 		this.positions[move.main.piece.id] = move.main.newPosition;
+
 		const cell = model.getCell(move.main.newPosition.x, move.main.newPosition.y);
-		const cellOld = model.getCell(move.main.oldPosition.x, move.main.oldPosition.y);
 		this.occupiers[cell.id] = move.main.piece;
-		if(cellOld) this.occupiers[cellOld.id] = null;
+		this.lives[this.turn] += move.main.piece.entity.life[move.main.newPosition.face];
+		
+		const cellOld = model.getCell(move.main.oldPosition.x, move.main.oldPosition.y);
+		if(cellOld && ! move.main.oldPosition.isOut){
+			this.occupiers[cellOld.id] = null;
+			this.lives[this.turn] -= move.main.piece.entity.life[move.main.oldPosition.face];
+		}
 	}
-	if(move.captured) this.positions[move.captured.piece.id] = move.captured.newPosition;
+	if(move.captured){
+		this.positions[move.captured.piece.id] = move.captured.newPosition;
+		this.lives[1 - this.turn] -= move.captured.piece.entity.life[move.captured.oldPosition.face];
+	}
+	this.turn = 1 - this.turn;
 }
 BoardState.prototype.revert = function(){
 	this.turn = 1 - this.turn;
 	const move = this.history.pop();
 	if(move.main){
 		this.positions[move.main.piece.id] = move.main.oldPosition;
+
 		const cell = model.getCell(move.main.newPosition.x, move.main.newPosition.y);
-		const cellOld = model.getCell(move.main.oldPosition.x, move.main.oldPosition.y);
-		if(cellOld) this.occupiers[cellOld.id] = move.main.piece;
 		this.occupiers[cell.id] = move.captured ? move.captured.piece : null;
+		this.lives[this.turn] -= move.main.piece.entity.life[move.main.newPosition.face];
+
+		const cellOld = model.getCell(move.main.oldPosition.x, move.main.oldPosition.y);
+		if(cellOld && ! move.main.oldPosition.isOut && ! move.main.oldPosition.isExcluded){
+			this.occupiers[cellOld.id] = move.main.piece;
+			this.lives[this.turn] += move.main.piece.entity.life[move.main.oldPosition.face];
+		}
 	}
 	if(move.captured){
 		this.positions[move.captured.piece.id] = move.captured.oldPosition;
+		this.lives[1 - this.turn] += move.captured.piece.entity.life[move.captured.oldPosition.face];
 	}
 }
 BoardState.prototype.makeMoveLineString = function(moveLine){ // moveLine は直近の手が最後，現在盤面からのラインでないとバグる

@@ -82,10 +82,10 @@ const Game = function(props){
 
 	const checkWinner = () => {
 		if( ! isRunning) return;
-		const winner = model.checkWinner(positions);
-		if(winner){
+		const winner = new BoardState(positions, turn, []).getWinner();
+		if(winner >= 0){
 			setIsRunning(false);
-			const message = ["あなた", "ＡＩ"][winner.player] + "の勝ちです。";
+			const message = ["あなた", "ＡＩ"][winner] + "の勝ちです。";
 			setAlert({
 				title: "",
 				message,

@@ -39,6 +39,8 @@ TODO
 ・劣後度（優先度トップとの差）の累積が大きい手は無視する（捨てる手のとき）
 　※現状は捨てる手のときでなくても打ち切って静的評価をしている
 
+・AIの手で詰んだとき読み筋の表示がおかしい
+
 */
 
 solver.minDepth = 3;
@@ -51,9 +53,9 @@ solver.evaluateFromStack = () => {
 		const item = solver.stack.at(-1);
 		const { turn, move, queue, value, min, max, bestLine, parent, illness } = item;
 		if( ! queue){ // 上から進んできて候補手の生成前
-			const check = model.checkWinner(solver.current.positions);
-			if(check){ 
-				item.value = [10000, -10000][check.player];
+			const winner = solver.current.getWinner();
+			if(winner >= 0){ 
+				item.value = [10000, -10000][winner];
 				item.bestLine = [];
 				solver.current.revert();
 				if(globalThis.DEBUG){
@@ -88,7 +90,7 @@ solver.evaluateFromStack = () => {
 				continue;
 			}
 			else{ // 下に進めない（静的評価をする）
-				item.value = solver.evaluate(solver.current.positions, solver.current.occupiers);
+				item.value = solver.evaluate(solver.current);
 				item.bestLine = [];
 				solver.current.revert();
 				if(globalThis.DEBUG){
@@ -161,6 +163,7 @@ solver.evaluateFromStack = () => {
 		name: string | undefined
 	}
 */
+// TODO: x, y をやめて z にしたい
 
 solver.calcDomination = (positions, occupiers) => {
 	const counts = [[], []];
@@ -245,12 +248,12 @@ solver.worthiness = [
 ];
 
 solver.evaluationCounter = 0;
-solver.evaluate = (positions, occupiers) => {
-	const winner = model.checkWinner(positions);
-	if(winner){
-		if(winner.player == 0) return 10000; else return -10000;
+solver.evaluate = (board) => {
+	const winner = board.getWinner();
+	if(winner >= 0){
+		if(winner == 0) return 10000; else return -10000;
 	}
-	const [counts] = solver.calcDomination(positions, occupiers);
+	const [counts] = solver.calcDomination(board.positions, board.occupiers);
 
 	let value = 0;
 	for(let c of model.cells){
@@ -258,9 +261,11 @@ solver.evaluate = (positions, occupiers) => {
 		else if(counts[0][c.id] < counts[1][c.id]) value -= 100.;
 	}
 	for(let p of model.pieces){
-		if(positions[p.id].isExcluded) continue;
-		if(positions[p.id].player == 0) value += 100 * solver.worthiness[p.entity.id][positions[p.id].face];
-		else value -= 100 * solver.worthiness[p.entity.id][positions[p.id].face];
+		if(board.positions[p.id].isExcluded) continue;
+		if(board.positions[p.id].player == 0){
+			value += 100 * solver.worthiness[p.entity.id][board.positions[p.id].face];
+		}
+		else value -= 100 * solver.worthiness[p.entity.id][board.positions[p.id].face];
 	}
 
 	solver.evaluationCounter += 1;
