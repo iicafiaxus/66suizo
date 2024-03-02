@@ -1,17 +1,10 @@
 "REQUIRE models/model.js";
 
-// TODO: たぶんpushにするほうが良い（粗配列になっている気がする）
-model.lines = [];
-for(let player of [0, 1]){
-	model.lines[player] = [];
-	for(let piece of model.pieces){
-		model.lines[player][piece.id] = [];
-		for(let face of [0, 1]){
-			model.lines[player][piece.id][face] = [];
-			for(let cell0 of model.cells){
-				model.lines[player][piece.id][face][cell0.id] = [];
-				const lines = piece.entity.lines[face];
-				for(let line of lines){
+model.lines = [0, 1].map(player => 
+	model.pieces.map(piece =>
+		[0, 1].map(face => 
+			model.cells.map(cell0 =>
+				piece.entity.lines[face].map(line => {
 					const cells = [];
 					for(let t of line){
 						const x1 = cell0.x + t.dx * [1, -1][player];
@@ -20,12 +13,13 @@ for(let player of [0, 1]){
 							if(x1 == cell.x && y1 == cell.y) cells.push(cell);
 						}
 					}
-					model.lines[player][piece.id][face][cell0.id].push(cells);
-				}
-			}
-		}
-	}
-}
+					return cells;
+				})
+			)
+		)
+	)
+)
+// model.lines[player][piece.id][face][cell.id] : cell[][]
 
 const BoardState = function(positions, turn, history){
 	this.positions = positions;
