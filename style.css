@@ -263,7 +263,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 
 .modal-main *{
-	font-size: min(6vmin, 30px);
+	font-size: min(4vw, 30px);
 }
 .modal-main .alert-message{
 	margin: 8px 0 0.3em;
@@ -276,7 +276,13 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	text-align: justify;
 }
 .modal-main .message-log .detail{
-	margin-left: 2em;
+	line-height: 1.2;
+	border: 1px solid #999;
+	margin: 4px;
+	padding: 4px;
+	float: right;
+	width: calc(100% - ((1em + 32px) + (1em * 6 + 4px * 6 + 1px * 7) + (1em + 32px)) - 8px - 8px - 2px - 32px - 32px);
+	clear: right;
 }
 .modal-main .buttons{
 	display: flex;
@@ -289,7 +295,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	min-height: 2.25em;
 	height: fit-content;
 	align-self: center;
-	font-size: min(7.2vmin, 36px); 
+	font-size: min(4.8vw, 36px); 
 	margin: 0.5em 0.25em;
 	padding: 0 calc(4px + 0.5em);
 	cursor: pointer;
@@ -327,6 +333,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	text-align: end;
 	line-height: 1;
 	padding: 8px 16px;
+	width: calc(1em + 32px);
 	height: calc(1em * 6 + 4px * 6 + 1px * 7);
 }
 .board-detail .komadai.player1{

@@ -25,7 +25,7 @@ solver.initEvaluation = (onFound, onUpdated, positions, turn, history) => {
 	solver.counter = 0;
 	console.log(solver.current.makePositionString());
 	solver.onEnd = (value, moveLine) => {
-		solver.log("読み筋 : " + solver.current.makeMoveLineString(moveLine) + " (" + value + ")");
+		solver.log("読み筋 : " + solver.current.makeMoveLineString(moveLine, history.at(-1)?.main.newPosition.cell) + " (" + value + ")");
 		solver.isWorking = false;
 		onFound(moveLine && moveLine.at(-1));
 	};
@@ -85,7 +85,7 @@ solver.evaluateFromStack = () => {
 				const maxLikeliness = nextMoves[0].likeliness;
 				for(let m of nextMoves) m.illness = maxLikeliness - m.likeliness;
 				if(solver.stack.length == 1){
-					for(let m of nextMoves) m.name = solver.current.makeMoveLineString([m]);
+					for(let m of nextMoves) m.name = solver.current.makeMoveLineString([m], solver.current.history.at(-1)?.main.newPosition.cell);
 					console.log("候補手 : " + nextMoves.map(m =>
 						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
 					solver.log("有力手 : " + (nextMoves.filter(m => m.likeliness > 0).map(m => m.name).join(", ") || "なし"));

@@ -134,7 +134,7 @@ const Game = function(props){
 				piece: captured, newPosition: capturedPosition, oldPosition: positions[captured.id]
 			} : null,
 			likeliness: 0,
-			name: model.makeMoveString(piece, cell, positions, newPosition.face, positions[piece.id].cell)
+			name: model.makeMoveString(piece, cell, positions, newPosition.face, history.at(-1)?.main.newPosition.cell)
 		};
 		if(promo[0] && promo[1]){
 			setAlert({
@@ -216,6 +216,11 @@ const Game = function(props){
 		solver.solve(positions, turn, handleAiMove, handleAiMessage, handleAiLog, history);
 	}, [isCallingAi, isRunning]);
 
+	const logBodyRef = React.useRef(null);
+	React.useEffect(() => {
+		if(logBodyRef.current) logBodyRef.current.scrollTo({top: logBodyRef.current.scrollHeight});
+	}, [showsLog]);
+
 
 	return (
 		<React.Fragment>
@@ -255,7 +260,7 @@ const Game = function(props){
 			</Modal>}
 			{showsLog && <Modal onClose={() => setShowsLog(false)}>
 				<div className="modal-title">履歴詳細</div>
-				<div className="modal-body">
+				<div className="modal-body" ref={logBodyRef}>
 					{logLines.length ?
 					<div className="message-log">
 						{logLines.map((line, i) => <React.Fragment key={i}>{line}</React.Fragment>)}
@@ -269,7 +274,7 @@ const Game = function(props){
 
 const BoardDetailLog = function(props){
 	const grid = [];
-	const komadai = ["", ""];
+	const komadai = ["持駒　", "持駒　"];
 	for(let x = 0; x < model.xSize; x ++){
 		grid.push([]);
 		for(let y = 0; y < model.ySize; y ++) grid.at(-1).push({name: "", player: -1, isLastCell: false});
@@ -284,6 +289,12 @@ const BoardDetailLog = function(props){
 			player: pos.player,
 			isLastCell: pos.cell.id == props.lastMove?.main?.newPosition.cell?.id
 		};
+	}
+	for(let player of [0, 1]){
+		if(komadai[player] == "持駒　") komadai[player] = "持駒　なし";
+		const pawnCount = komadai[player].split("歩").length - 1;
+		const pawnCountString = ["", "", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"][pawnCount];
+		if(pawnCount > 1) komadai[player] = komadai[player].replace(/歩+/, "歩" + pawnCountString);
 	}
 	return <div className="board-detail">
 		<div className="komadai player1">{komadai[1]}</div>

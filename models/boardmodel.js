@@ -88,10 +88,10 @@ BoardState.prototype.revert = function(){
 		this.lives[1 - this.turn] += move.captured.piece.entity.life[move.captured.oldPosition.face];
 	}
 }
-BoardState.prototype.makeMoveLineString = function(moveLine){ // moveLine は直近の手が最後，現在盤面からのラインでないとバグる
+BoardState.prototype.makeMoveLineString = function(moveLine, lastCellBefore = null){ // moveLine は直近の手が最後，現在盤面からのラインでないとバグる
 	if( ! moveLine) return "";
 	let moveStrings = [];
-	let cell = null, lastCell = null;
+	let cell = null, lastCell = lastCellBefore;
 	for(move of moveLine.toReversed()){
 		cell = move.main.newPosition.cell;
 		moveStrings.push(model.makeMoveString(move.main.piece, cell, this.positions, move.main.newPosition.face, lastCell));
