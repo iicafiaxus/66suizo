@@ -153,7 +153,7 @@ solver.evaluateFromStack = () => {
 }
 
 /*
-	position = { x, y, face, player, isOut, isExcluded }
+	position = { cell, face, player, isOut, isExcluded }
 	move = {
 		main: { piece, newPosition, oldPosition },
 		captured: { piece, newPosition, oldPosition } | null,
@@ -161,7 +161,6 @@ solver.evaluateFromStack = () => {
 		name: string | undefined
 	}
 */
-// TODO: x, y をやめて z にしたい
 
 solver.calcDomination = (board) => {
 	const counts = [[], []];
@@ -176,8 +175,7 @@ solver.calcDomination = (board) => {
 		if(board.positions[piece.id].isExcluded) continue;
 		if(board.positions[piece.id].isOut) continue;
 		const turn = board.positions[piece.id].player;
-		const lines = model.lines[turn][piece.id][board.positions[piece.id].face]
-			[board.positions[piece.id].x][board.positions[piece.id].y];
+		const lines = model.lines[turn][piece.id][board.positions[piece.id].face][board.positions[piece.id].cell.id];
 		const worth = solver.worthiness[piece.entity.id][board.positions[piece.id].face];
 		for(let line of lines){
 			for(let cell of line){
@@ -194,22 +192,17 @@ solver.calcLikeliness = (board, moves) => {
 	// moves の要素である move に likeliness を書き込む
 	const lastMove = board.history.at(-1);
 	const lastMove2 = board.history.at(-2);
-	const lastX = lastMove?.main?.newPosition?.x;
-	const lastY = lastMove?.main?.newPosition?.y;
+	const lastCell = lastMove?.main?.newPosition?.cell;
 	const [counts, minWorths, maxWorths] = solver.calcDomination(board);
 	for(let move of moves){
 		let l = 0;
 		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
 		const oldWorth = solver.worthiness[move.main.piece.entity.id][move.main.oldPosition.face];
 		const captureWorth = move.captured ? solver.worthiness[move.captured.piece.entity.id][move.captured.oldPosition.face] : 0;
-		const x = move.main.newPosition.x;
-		const y = move.main.newPosition.y;
-		const z = model.getCell(x, y).id;
-		const dominationCount = move.main.oldPosition.isOut ? counts[board.turn][z] : (counts[board.turn][z] - 1);
+		const cell = move.main.newPosition.cell;
+		const dominationCount = move.main.oldPosition.isOut ? counts[board.turn][cell.id] : (counts[board.turn][cell.id] - 1);
 			// FIXME: 飛車先の歩を突いたような場面でカウントが正しくない
-		const xo = move.main.oldPosition.x;
-		const yo = move.main.oldPosition.y;
-		const zo = model.getCell(xo, yo)?.id;
+		const oldCell = move.main.oldPosition.cell;
 		// 取る手は＋
 		l += 100 * captureWorth;
 		// 成る手は＋
@@ -218,19 +211,23 @@ solver.calcLikeliness = (board, moves) => {
 		if(lastMove && move.captured && move.captured.piece.id == lastMove.main.piece.id) l += 25;
 		// 直前に自分が操作した駒を動かすのは＋　ただし手を戻すのは－
 		if(lastMove2 && move.main.piece.id == lastMove2.main.piece.id){
-			if(lastMove2.main.oldPosition.x == x && lastMove2.main.oldPosition.y == y) l -= 60;
+			if(lastMove2.main.oldPosition.cell?.id == cell.id) l -= 60;
 			else l += 60;
 		}
 		// 直前に自分が取った駒を打つのは＋
 		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) l += 35;
 		// 直前に相手が操作したマスの近くは＋
-		if(x >= lastX - 1 && x <= lastX + 1 && y >= lastY - 1 && y <= lastY + 1) l += 30;
+		if(cell.x >= lastCell.x - 1 && cell.x <= lastCell.x + 1 && cell.y >= lastCell.y - 1 && cell.y <= lastCell.y + 1){
+			l += 30;
+		}
 		// 自分の利きがなく相手の利きがある場所へ入る手は－
-		if(dominationCount == 0 && counts[1 - board.turn][z] > 0) l -= 90 * worth;
+		if(dominationCount == 0 && counts[1 - board.turn][cell.id] > 0) l -= 90 * worth;
 		// 自分と相手の利きがある場所へ入る手は，相手の駒のほうが安ければ－
-		if(dominationCount > 0 && counts[1 - board.turn][z] > 0 && minWorths[1 - board.turn][z] < worth) l -= 70 * worth;
+		if(dominationCount > 0 && counts[1 - board.turn][cell.id] > 0 && minWorths[1 - board.turn][cell.id] < worth) l -= 70 * worth;
 		// 相手の安い駒に取られそうだった駒を動かす手は＋
-		if( ! move.main.oldPosition.isOut && minWorths[1 - board.turn][zo] < worth) l += 50 * (worth - minWorths[1 - board.turn][zo]);
+		if( ! move.main.oldPosition.isOut && minWorths[1 - board.turn][oldCell.id] < worth){
+			l += 50 * (worth - minWorths[1 - board.turn][oldCell.id]);
+		}
 		// TODO: 増やす（増やしたら打ち切りのしきい値も調整する）
 		// 相手の駒に利きを与える手は＋
 		

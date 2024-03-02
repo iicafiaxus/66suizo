@@ -27,7 +27,7 @@ const Board = function(props){
 		else props.openMenu();
 	}
 	const getCellPieces = (cell) => props.pieces.filter(p =>
-		! props.positions[p.id].isOut && props.positions[p.id].x == cell.x && props.positions[p.id].y == cell.y
+		! props.positions[p.id].isOut && props.positions[p.id].cell.id == cell.id
 	);
 	const getKomadaiPieces = (player) => props.pieces.filter(p => 
 		props.positions[p.id].isOut && props.positions[p.id].player == player &&

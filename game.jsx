@@ -114,13 +114,11 @@ const Game = function(props){
 		if( ! model.checkCanMove(piece, cell, positions)) return;
 		const promo = model.checkPromotion(piece, cell, positions);
 			// returns [a, b]; a: can keep raw, b: can promote
-		const newPosition = { ...positions[piece.id], x: cell.x, y: cell.y, face: promo[1] ? 1 : 0,
+		const newPosition = { ...positions[piece.id], cell, face: promo[1] ? 1 : 0,
 			isOut: false };
-		const captured = pieces.find(p =>
-			positions[p.id].x == cell.x && positions[p.id].y == cell.y
-		);
-		const capturedPosition = captured ? { ...positions[captured.id], x: -1, y: -1, 
-			face: 0, player: positions[piece.id].player, isOut: true, isExcluded: captured.entity.isSingleUse
+		const captured = pieces.find(p => positions[p.id].cell?.id == cell.id); // TODO: このようなものは occupier を使う
+		const capturedPosition = captured ? { ...positions[captured.id], cell: null,
+			face: 0, player: positions[piece.id].player, isOut: true, isExcluded: !!captured.entity.isSingleUse
 		} : null;
 		const move = {
 			main: { piece, newPosition, oldPosition: positions[piece.id] },
@@ -147,7 +145,7 @@ const Game = function(props){
 		setTurn(1 - turn);
 		setLastMove({
 			piece: move.main.piece,
-			cell: model.getCell(move.main.newPosition.x, move.main.newPosition.y),
+			cell: move.main.newPosition.cell,
 			face: move.main.newPosition.face
 		});
 		setHistory(h => [...h, move]);

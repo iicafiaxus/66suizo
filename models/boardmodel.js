@@ -1,5 +1,6 @@
 "REQUIRE models/model.js";
 
+// TODO: たぶんpushにするほうが良い（粗配列になっている気がする）
 model.lines = [];
 for(let player of [0, 1]){
 	model.lines[player] = [];
@@ -8,8 +9,7 @@ for(let player of [0, 1]){
 		for(let face of [0, 1]){
 			model.lines[player][piece.id][face] = [];
 			for(let cell0 of model.cells){
-				if( ! model.lines[player][piece.id][face][cell0.x])  model.lines[player][piece.id][face][cell0.x] = [];
-				model.lines[player][piece.id][face][cell0.x][cell0.y] = [];
+				model.lines[player][piece.id][face][cell0.id] = [];
 				const lines = piece.entity.lines[face];
 				for(let line of lines){
 					const cells = [];
@@ -20,7 +20,7 @@ for(let player of [0, 1]){
 							if(x1 == cell.x && y1 == cell.y) cells.push(cell);
 						}
 					}
-					model.lines[player][piece.id][face][cell0.x][cell0.y].push(cells);
+					model.lines[player][piece.id][face][cell0.id].push(cells);
 				}
 			}
 		}
@@ -38,7 +38,7 @@ const BoardState = function(positions, turn, history){
 		const pos = this.positions[piece.id];
 		if(pos.isOut) continue;
 		if(pos.isExcluded) continue;
-		this.occupiers[model.getCell(pos.x, pos.y).id] = piece;
+		this.occupiers[pos.cell.id] = piece;
 	}
 
 	this.lives = [0, 0];
@@ -57,11 +57,11 @@ BoardState.prototype.perform = function(move){
 	if(move.main){
 		this.positions[move.main.piece.id] = move.main.newPosition;
 
-		const cell = model.getCell(move.main.newPosition.x, move.main.newPosition.y);
+		const cell = move.main.newPosition.cell;
 		this.occupiers[cell.id] = move.main.piece;
 		this.lives[this.turn] += move.main.piece.entity.life[move.main.newPosition.face];
 		
-		const cellOld = model.getCell(move.main.oldPosition.x, move.main.oldPosition.y);
+		const cellOld = move.main.oldPosition.cell;
 		if(cellOld && ! move.main.oldPosition.isOut){
 			this.occupiers[cellOld.id] = null;
 			this.lives[this.turn] -= move.main.piece.entity.life[move.main.oldPosition.face];
@@ -79,11 +79,11 @@ BoardState.prototype.revert = function(){
 	if(move.main){
 		this.positions[move.main.piece.id] = move.main.oldPosition;
 
-		const cell = model.getCell(move.main.newPosition.x, move.main.newPosition.y);
+		const cell = move.main.newPosition.cell;
 		this.occupiers[cell.id] = move.captured ? move.captured.piece : null;
 		this.lives[this.turn] -= move.main.piece.entity.life[move.main.newPosition.face];
 
-		const cellOld = model.getCell(move.main.oldPosition.x, move.main.oldPosition.y);
+		const cellOld = move.main.oldPosition.cell;
 		if(cellOld && ! move.main.oldPosition.isOut && ! move.main.oldPosition.isExcluded){
 			this.occupiers[cellOld.id] = move.main.piece;
 			this.lives[this.turn] += move.main.piece.entity.life[move.main.oldPosition.face];
@@ -99,7 +99,7 @@ BoardState.prototype.makeMoveLineString = function(moveLine){ // moveLine は直
 	let moveStrings = [];
 	let cell = null, lastCell = null;
 	for(move of moveLine.toReversed()){
-		cell = model.getCell(move.main.newPosition.x, move.main.newPosition.y);
+		cell = move.main.newPosition.cell;
 		moveStrings.push(model.makeMoveString(move.main.piece, cell, this.positions, move.main.newPosition.face, lastCell));
 		this.perform(move);
 		lastCell = cell;
@@ -126,14 +126,15 @@ BoardState.prototype.scanMoves = function(){
 				if(this.turn == 1 && cell.x > 5 - piece.entity.forcePromotion) continue;
 				if(piece.entity.occupiesColumn){
 					if(model.pieces.find(p => 
-						this.positions[p.id].y == cell.y && this.positions[p.id].player == this.turn &&
+						this.positions[p.id].cell?.y == cell.y &&
+						this.positions[p.id].player == this.turn &&
 						p.entity == piece.entity && this.positions[p.id].face == 0
 					)) continue;
 				}
 				moves.push({
 					main: {
 						piece,
-						newPosition: { x: cell.x, y: cell.y, face: 0, player: this.turn,
+						newPosition: { cell, face: 0, player: this.turn,
 							isOut: false, isExcluded: false },
 						oldPosition: this.positions[piece.id],
 					},
@@ -143,7 +144,7 @@ BoardState.prototype.scanMoves = function(){
 		}
 		else{
 			const lines = model.lines[this.turn][piece.id][
-				this.positions[piece.id].face][this.positions[piece.id].x][this.positions[piece.id].y];
+				this.positions[piece.id].face][this.positions[piece.id].cell.id];
 			for(let line of lines){
 				for(let cell of line){
 					if(this.positions[this.occupiers[cell.id]?.id]?.player == this.turn) break;
@@ -151,14 +152,14 @@ BoardState.prototype.scanMoves = function(){
 					moves.push({
 						main: {
 							piece,
-							newPosition: { x: cell.x, y: cell.y, face: (promo[1] ? 1 : 0), player: this.turn,
+							newPosition: { cell, face: (promo[1] ? 1 : 0), player: this.turn,
 								isOut: false, isExcluded: false },
 							oldPosition: this.positions[piece.id],
 						},
 						captured: this.occupiers[cell.id] ? {
 							piece: this.occupiers[cell.id],
-							newPosition: { x: 0, y: 0, face: 0, player: this.turn,
-								isOut: true, isExcluded: this.occupiers[cell.id].entity.isSingleUse },
+							newPosition: { cell: null, face: 0, player: this.turn,
+								isOut: true, isExcluded: !!this.occupiers[cell.id].entity.isSingleUse },
 							oldPosition: this.positions[this.occupiers[cell.id].id],
 						} : null,
 						likeliness: 0,
@@ -179,7 +180,7 @@ BoardState.prototype.makePositionString = function(){
 	}
 	for(let piece of model.pieces){
 		const pos = this.positions[piece.id];
-		if( ! pos.isOut) grid[pos.x][pos.y] = piece.entity.shortNames[pos.face].charAt(0);
+		if( ! pos.isOut) grid[pos.cell.x][pos.cell.y] = piece.entity.shortNames[pos.face].charAt(0);
 	}
 	return grid.map(row => row.join("")).join("\n");
 }
