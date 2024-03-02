@@ -217,7 +217,10 @@ solver.calcLikeliness = (board, moves) => {
 		// 直前に自分が取った駒を打つのは＋
 		if(lastMove2?.captured && move.main.piece.id == lastMove2.captured.piece.id) l += 35;
 		// 直前に相手が操作したマスの近くは＋
-		if(cell.x >= lastCell.x - 1 && cell.x <= lastCell.x + 1 && cell.y >= lastCell.y - 1 && cell.y <= lastCell.y + 1){
+		if(lastCell &&
+			cell.x >= lastCell.x - 1 && cell.x <= lastCell.x + 1 &&
+			cell.y >= lastCell.y - 1 && cell.y <= lastCell.y + 1
+		){
 			l += 30;
 		}
 		// 自分の利きがなく相手の利きがある場所へ入る手は－
