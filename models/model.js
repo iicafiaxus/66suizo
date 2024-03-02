@@ -80,6 +80,7 @@ model.checkCanMove = (piece, cell, positions) => {
 		return true;
 	}
 	// FIXME: とりあえず愚直に変換してあるが occupier など使ってスマートにしたい
+	// (使用頻度が低いのでスマートでなくても差し支えはない)
 	for(let line of piece.entity.lines[positions[piece.id].face]){
 		for(let t of line){
 			const x1 = positions[piece.id].cell.x + t.dx * [1, -1][positions[piece.id].player];
