@@ -299,11 +299,15 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	min-height: 200px;
 }
 
-table.board-detail{
+.board-detail{
+	display: flex;
+	flex-direction: row;
+}
+.board-detail table{
 	border: 1px solid #999;
 	border-collapse: collapse;
 }
-table.board-detail td{
+.board-detail table td{
 	height: 1em;
 	width: 1em;
 	line-height: 1em;
@@ -311,7 +315,20 @@ table.board-detail td{
 	padding: 2px;
 	vertical-align: middle;
 }
-table.board-detail .player1{
+.board-detail table td.last-cell{
+	background: #f996;
+}
+.board-detail table td.player1{
 	transform: rotate(180deg);
-	transform-origin: 50% 50%;
+}
+.board-detail .komadai{
+	letter-spacing: 0;
+	writing-mode: vertical-lr;
+	text-align: end;
+	line-height: 1;
+	padding: 8px 16px;
+	height: calc(1em * 6 + 4px * 6 + 1px * 7);
+}
+.board-detail .komadai.player1{
+	transform: rotate(180deg);
 }

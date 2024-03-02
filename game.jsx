@@ -56,6 +56,7 @@ const Game = function(props){
 			clock.reset();
 		}
 		setTimes([0, 0]);
+		addLogLine("初形から");
 		openMenu();
 	}
 	React.useEffect(() => {
@@ -200,7 +201,7 @@ const Game = function(props){
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
-		addLogLine(<BoardDetailLog positions={positions} />);
+		addLogLine(<BoardDetailLog positions={positions} lastMove={history.at(-1)} />);
 		addLogLine(<hr />);
 		checkWinner();
 		if( ! isRunning) return;
@@ -268,22 +269,31 @@ const Game = function(props){
 
 const BoardDetailLog = function(props){
 	const grid = [];
+	const komadai = ["", ""];
 	for(let x = 0; x < model.xSize; x ++){
 		grid.push([]);
-		for(let y = 0; y < model.ySize; y ++) grid.at(-1).push({name: "", player: -1});
+		for(let y = 0; y < model.ySize; y ++) grid.at(-1).push({name: "", player: -1, isLastCell: false});
 	}
 	for(let piece of model.pieces){
 		const pos = props.positions[piece.id];
-		if( ! pos.isOut) grid[pos.cell.x][pos.cell.y] = {
+		if(pos.isOut){
+			if( ! pos.isExcluded) komadai[pos.player] += piece.entity.shortNames[pos.face].charAt(0);
+		}
+		else grid[pos.cell.x][pos.cell.y] = {
 			name: piece.entity.shortNames[pos.face].charAt(0),
-			player: pos.player
+			player: pos.player,
+			isLastCell: pos.cell.id == props.lastMove?.main?.newPosition.cell?.id
 		};
 	}
-	return <table className="board-detail detail"><tbody>
-		{grid.map((row, x) => <tr key={x}>
-			{row.map((item, y) => <td key={y} className={"player" + item.player}>
-				{item.name}
-			</td>)}
-		</tr>)}
-	</tbody></table>
+	return <div className="board-detail">
+		<div className="komadai player1">{komadai[1]}</div>
+		<table><tbody>
+			{grid.map((row, x) => <tr key={x}>
+				{row.map((item, y) => <td key={y} className={"player" + item.player + (item.isLastCell ? " last-cell" : "")}>
+					{item.name}
+				</td>)}
+			</tr>)}
+		</tbody></table>
+		<div className="komadai player0">{komadai[0]}</div>
+	</div>
 }
