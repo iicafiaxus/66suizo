@@ -38,6 +38,10 @@ const Game = function(props){
 	const [status, setStatus] = React.useState("");
 	const [logLines, setLogLines] = React.useState([]);
 	const [showsLog, setShowsLog] = React.useState(false);
+	const addLogLine = (lineContent) => {
+		const line = React.isValidElement(lineContent) ? lineContent : <p>{lineContent}</p>;
+		setLogLines(lines => [...lines, line]);
+	}
 
 	const [isInitial, setIsInitial] = React.useState(true);
 	const init = () => {
@@ -153,9 +157,9 @@ const Game = function(props){
 			face: move.main.newPosition.face
 		});
 		setHistory(h => [...h, move]);
-		setLogLines(lines => [...lines, (history.length + 1) + " 手目 - " + move.name]);
+		addLogLine((history.length + 1) + ". " + move.name);
 		setIsAfterMove(true);
-	}
+		}
 
 	const handleAiMove = (move) => { // m: move object (new)
 		if(isRunning && move){
@@ -178,7 +182,7 @@ const Game = function(props){
 		].join(" "));
 	}
 	const handleAiLog = (message) => {
-		setLogLines(lines => [...lines, message]);
+		addLogLine(<p className="detail">{message}</p>);
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);
@@ -196,6 +200,8 @@ const Game = function(props){
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
+		addLogLine(<BoardDetailLog positions={positions} />);
+		addLogLine(<hr />);
 		checkWinner();
 		if( ! isRunning) return;
 		if(model.useAi[turn]) setIsCallingAi(true);
@@ -214,7 +220,7 @@ const Game = function(props){
 		<React.Fragment>
 			<div className={"game" + (isRunning ? " running" : "")}>
 				<SystemArea turn={turn} times={times} status={status} buttons={[
-					<button onClick={() => setShowsLog(true)}>詳細</button>
+					<button onClick={() => setShowsLog(true)}>履歴詳細...</button>
 				]} />
 				<Board
 					xSize={xSize} ySize={ySize}
@@ -247,12 +253,37 @@ const Game = function(props){
 				</div>
 			</Modal>}
 			{showsLog && <Modal onClose={() => setShowsLog(false)}>
+				<div className="modal-title">履歴詳細</div>
 				<div className="modal-body">
+					{logLines.length ?
 					<div className="message-log">
-						{logLines.map((line, i) => <p key={i}>{line}</p>)}
+						{logLines.map((line, i) => <React.Fragment key={i}>{line}</React.Fragment>)}
 					</div>
+					: <div><p>履歴はありません。</p></div>}
 				</div>
 			</Modal>}
 		</React.Fragment>
 	)
+}
+
+const BoardDetailLog = function(props){
+	const grid = [];
+	for(let x = 0; x < model.xSize; x ++){
+		grid.push([]);
+		for(let y = 0; y < model.ySize; y ++) grid.at(-1).push({name: "", player: -1});
+	}
+	for(let piece of model.pieces){
+		const pos = props.positions[piece.id];
+		if( ! pos.isOut) grid[pos.cell.x][pos.cell.y] = {
+			name: piece.entity.shortNames[pos.face].charAt(0),
+			player: pos.player
+		};
+	}
+	return <table className="board-detail detail"><tbody>
+		{grid.map((row, x) => <tr key={x}>
+			{row.map((item, y) => <td key={y} className={"player" + item.player}>
+				{item.name}
+			</td>)}
+		</tr>)}
+	</tbody></table>
 }

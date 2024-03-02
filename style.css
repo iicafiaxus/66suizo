@@ -127,6 +127,8 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .systemarea .system-buttons{
 	position: absolute;
+	left: 24px;
+	top: 24px;
 }
 
 
@@ -244,7 +246,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	);
 	border-radius: 8px; border: 2px solid #000f;
 	box-shadow: #0008 0px 0px 20px 0px; 
-	max-width: 90vw; max-height: 90vh; overflow-y: auto;
+	max-width: 90vw; max-height: 90vh;
 	min-width: 50vw; min-height: min(30vw, 50vh);
 	left: 50%; top: 40%; transform: translate(-50%, -40%);
 	display: flex; flex-direction: column;
@@ -256,8 +258,8 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .modal-body {
 	padding: 16px 24px;
 	width: max-content; max-width: calc(100% - 48px); margin: auto; 
-	display: flex; flex-direction: column; justify-content: space-around;
-	flex-grow: 1;
+	display: flex; flex-direction: column;
+	flex-grow: 0; overflow-y: auto;
 }
 
 .modal-main *{
@@ -271,6 +273,10 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .modal-main .message-log p{
 	margin: 0;
+	text-align: justify;
+}
+.modal-main .message-log .detail{
+	margin-left: 2em;
 }
 .modal-main .buttons{
 	display: flex;
@@ -291,4 +297,21 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .modal-main button.primaryButton{
 	min-height: 200px;
+}
+
+table.board-detail{
+	border: 1px solid #999;
+	border-collapse: collapse;
+}
+table.board-detail td{
+	height: 1em;
+	width: 1em;
+	line-height: 1em;
+	border: 1px solid #999;
+	padding: 2px;
+	vertical-align: middle;
+}
+table.board-detail .player1{
+	transform: rotate(180deg);
+	transform-origin: 50% 50%;
 }
