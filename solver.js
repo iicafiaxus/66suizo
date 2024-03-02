@@ -74,9 +74,7 @@ solver.evaluateFromStack = () => {
 					console.log({min, max});
 				}
 				const nextMoves = solver.current.scanMoves();
-				solver.calcLikeliness(nextMoves, 
-					solver.current.positions, solver.current.turn, solver.current.occupiers,
-					solver.current.history.at(-1), solver.current.history.at(-2));
+				solver.calcLikeliness(solver.current, nextMoves);
 				nextMoves.sort((a, b) => b.likeliness - a.likeliness);
 				// TODO: nextMoves.length == 0 だったときの処理
 				const maxLikeliness = nextMoves[0].likeliness;
@@ -165,7 +163,7 @@ solver.evaluateFromStack = () => {
 */
 // TODO: x, y をやめて z にしたい
 
-solver.calcDomination = (positions, occupiers) => {
+solver.calcDomination = (board) => {
 	const counts = [[], []];
 	const minWorths = [[], []];
 	const maxWorths = [[], []];
@@ -175,28 +173,30 @@ solver.calcDomination = (positions, occupiers) => {
 		maxWorths[turn].push(0);
 	}
 	for(let piece of model.pieces){
-		if(positions[piece.id].isExcluded) continue;
-		if(positions[piece.id].isOut) continue;
-		const turn = positions[piece.id].player;
-		const lines = model.lines[turn][piece.id][positions[piece.id].face]
-			[positions[piece.id].x][positions[piece.id].y];
-		const worth = solver.worthiness[piece.entity.id][positions[piece.id].face];
+		if(board.positions[piece.id].isExcluded) continue;
+		if(board.positions[piece.id].isOut) continue;
+		const turn = board.positions[piece.id].player;
+		const lines = model.lines[turn][piece.id][board.positions[piece.id].face]
+			[board.positions[piece.id].x][board.positions[piece.id].y];
+		const worth = solver.worthiness[piece.entity.id][board.positions[piece.id].face];
 		for(let line of lines){
 			for(let cell of line){
 				counts[turn][cell.id] += 1;
 				if(worth > maxWorths[turn][cell.id]) maxWorths[turn][cell.id] = worth;
 				if(worth < minWorths[turn][cell.id]) minWorths[turn][cell.id] = worth;
-				if(occupiers[cell.id]) break;
+				if(board.occupiers[cell.id]) break;
 			}
 		}
 	}
 	return [counts, minWorths, maxWorths];
 }
-solver.calcLikeliness = (moves, positions, turn, occupiers, lastMove, lastMove2) => {
+solver.calcLikeliness = (board, moves) => {
 	// moves の要素である move に likeliness を書き込む
+	const lastMove = board.history.at(-1);
+	const lastMove2 = board.history.at(-2);
 	const lastX = lastMove?.main?.newPosition?.x;
 	const lastY = lastMove?.main?.newPosition?.y;
-	const [counts, minWorths, maxWorths] = solver.calcDomination(positions, occupiers);
+	const [counts, minWorths, maxWorths] = solver.calcDomination(board);
 	for(let move of moves){
 		let l = 0;
 		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
@@ -205,7 +205,7 @@ solver.calcLikeliness = (moves, positions, turn, occupiers, lastMove, lastMove2)
 		const x = move.main.newPosition.x;
 		const y = move.main.newPosition.y;
 		const z = model.getCell(x, y).id;
-		const dominationCount = move.main.oldPosition.isOut ? counts[turn][z] : (counts[turn][z] - 1);
+		const dominationCount = move.main.oldPosition.isOut ? counts[board.turn][z] : (counts[board.turn][z] - 1);
 			// FIXME: 飛車先の歩を突いたような場面でカウントが正しくない
 		const xo = move.main.oldPosition.x;
 		const yo = move.main.oldPosition.y;
@@ -226,11 +226,11 @@ solver.calcLikeliness = (moves, positions, turn, occupiers, lastMove, lastMove2)
 		// 直前に相手が操作したマスの近くは＋
 		if(x >= lastX - 1 && x <= lastX + 1 && y >= lastY - 1 && y <= lastY + 1) l += 30;
 		// 自分の利きがなく相手の利きがある場所へ入る手は－
-		if(dominationCount == 0 && counts[1 - turn][z] > 0) l -= 90 * worth;
+		if(dominationCount == 0 && counts[1 - board.turn][z] > 0) l -= 90 * worth;
 		// 自分と相手の利きがある場所へ入る手は，相手の駒のほうが安ければ－
-		if(dominationCount > 0 && counts[1 - turn][z] > 0 && minWorths[1 - turn][z] < worth) l -= 70 * worth;
+		if(dominationCount > 0 && counts[1 - board.turn][z] > 0 && minWorths[1 - board.turn][z] < worth) l -= 70 * worth;
 		// 相手の安い駒に取られそうだった駒を動かす手は＋
-		if( ! move.main.oldPosition.isOut && minWorths[1 - turn][zo] < worth) l += 50 * (worth - minWorths[1 - turn][zo]);
+		if( ! move.main.oldPosition.isOut && minWorths[1 - board.turn][zo] < worth) l += 50 * (worth - minWorths[1 - board.turn][zo]);
 		// TODO: 増やす（増やしたら打ち切りのしきい値も調整する）
 		// 相手の駒に利きを与える手は＋
 		
@@ -253,7 +253,7 @@ solver.evaluate = (board) => {
 	if(winner >= 0){
 		if(winner == 0) return 10000; else return -10000;
 	}
-	const [counts] = solver.calcDomination(board.positions, board.occupiers);
+	const [counts] = solver.calcDomination(board);
 
 	let value = 0;
 	for(let c of model.cells){
