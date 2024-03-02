@@ -16,6 +16,9 @@ const SystemArea = function(props){
 
 	return <React.Fragment>
 		<div className="systemarea">
+			{props.buttons && <div className="system-buttons">
+				{props.buttons.map((button, i) => <span key={i}>{button}</span>)}
+			</div>}
 			<div className="status">
 				{props.status}
 			</div>

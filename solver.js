@@ -5,12 +5,17 @@
 const solver = {};
 
 solver.isWorking = false;
-solver.solve = (positions, turn, onFound, onUpdated, history = []) => {
+solver.log = () => {};
+solver.solve = (positions, turn, onFound, onUpdated, onLog, history = []) => {
 	solver.isWorking = true;
+	solver.log = (message) => {
+		onLog(message);
+		console.log(message);
+	}
 	solver.initEvaluation(onFound, onUpdated, positions, turn, history);
 }
 solver.cancel = () => {
-	console.log("中断しました。");
+	solver.log("中断しました。");
 	solver.isWorking = false;
 }
 
@@ -20,7 +25,7 @@ solver.initEvaluation = (onFound, onUpdated, positions, turn, history) => {
 	solver.counter = 0;
 	console.log(solver.current.makePositionString());
 	solver.onEnd = (value, moveLine) => {
-		console.log("読み筋 : " + solver.current.makeMoveLineString(moveLine) + " (" + value + ")");
+		solver.log("読み筋 : " + solver.current.makeMoveLineString(moveLine) + " (" + value + ")");
 		solver.isWorking = false;
 		onFound(moveLine && moveLine.at(-1));
 	};
@@ -81,7 +86,7 @@ solver.evaluateFromStack = () => {
 				for(let m of nextMoves) m.illness = maxLikeliness - m.likeliness;
 				if(solver.stack.length == 1){
 					for(let m of nextMoves) m.name = solver.current.makeMoveLineString([m]);
-					console.log("候補手 : " + nextMoves.map(m =>
+					solver.log("候補手 : " + nextMoves.map(m =>
 						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
 				}
 				item.queue = new Util.Queue(nextMoves);

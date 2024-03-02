@@ -36,6 +36,8 @@ const Game = function(props){
 
 	const [alert, setAlert] = React.useState(null);
 	const [status, setStatus] = React.useState("");
+	const [logLines, setLogLines] = React.useState([]);
+	const [showsLog, setShowsLog] = React.useState(false);
 
 	const [isInitial, setIsInitial] = React.useState(true);
 	const init = () => {
@@ -43,6 +45,7 @@ const Game = function(props){
 		setTurn(model.turn);
 		setLastMove(null);
 		setHistory([]);
+		setLogLines([]);
 		setIsRunning(false);
 		for(let clock of model.clocks){
 			clock.stop();
@@ -126,6 +129,7 @@ const Game = function(props){
 				piece: captured, newPosition: capturedPosition, oldPosition: positions[captured.id]
 			} : null,
 			likeliness: 0,
+			name: model.makeMoveString(piece, cell, positions, newPosition.face, positions[piece.id].cell)
 		};
 		if(promo[0] && promo[1]){
 			setAlert({
@@ -149,6 +153,7 @@ const Game = function(props){
 			face: move.main.newPosition.face
 		});
 		setHistory(h => [...h, move]);
+		setLogLines(lines => [...lines, (history.length + 1) + " 手目 - " + move.name]);
 		setIsAfterMove(true);
 	}
 
@@ -171,6 +176,9 @@ const Game = function(props){
 			param.move ? "(" + param.move?.name + " を検討中)..." : "",
 			param.bestMove ? "候補手 : " + param.bestMove?.name + " (" + param.value + ")" : "",
 		].join(" "));
+	}
+	const handleAiLog = (message) => {
+		setLogLines(lines => [...lines, message]);
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);
@@ -198,14 +206,16 @@ const Game = function(props){
 		if( ! isCallingAi) return;
 		setIsCallingAi(false);
 		if( ! isRunning) return;
-		solver.solve(positions, turn, handleAiMove, handleAiMessage, history);
+		solver.solve(positions, turn, handleAiMove, handleAiMessage, handleAiLog, history);
 	}, [isCallingAi, isRunning]);
 
 
 	return (
 		<React.Fragment>
 			<div className={"game" + (isRunning ? " running" : "")}>
-				<SystemArea turn={turn} times={times} status={status} />
+				<SystemArea turn={turn} times={times} status={status} buttons={[
+					<button onClick={() => setShowsLog(true)}>詳細</button>
+				]} />
 				<Board
 					xSize={xSize} ySize={ySize}
 					cells={cells}
@@ -234,6 +244,13 @@ const Game = function(props){
 							>{opt.caption}</button>
 						)}
 					</div>}
+				</div>
+			</Modal>}
+			{showsLog && <Modal onClose={() => setShowsLog(false)}>
+				<div className="modal-body">
+					<div className="message-log">
+						{logLines.map((line, i) => <p key={i}>{line}</p>)}
+					</div>
 				</div>
 			</Modal>}
 		</React.Fragment>

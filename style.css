@@ -125,6 +125,9 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .systemarea .timer.player1.active{
 	background: #ff9f;
 }
+.systemarea .system-buttons{
+	position: absolute;
+}
 
 
 .cell {
@@ -262,6 +265,12 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .modal-main .alert-message{
 	margin: 8px 0 0.3em;
+}
+.modal-main .message-log{
+	font-size: 80%;
+}
+.modal-main .message-log p{
+	margin: 0;
 }
 .modal-main .buttons{
 	display: flex;
