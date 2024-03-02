@@ -15,7 +15,7 @@ solver.solve = (positions, turn, onFound, onUpdated, onLog, history = []) => {
 	solver.initEvaluation(onFound, onUpdated, positions, turn, history);
 }
 solver.cancel = () => {
-	solver.log("中断しました。");
+	console.log("中断しました。");
 	solver.isWorking = false;
 }
 
@@ -155,7 +155,6 @@ solver.evaluateFromStack = () => {
 		});
 		window.setTimeout(() => solver.evaluateFromStack(), 0);
 	}
-	else solver.onUpdated({ message: "中断しました。" });
 }
 
 /*
