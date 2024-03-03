@@ -137,7 +137,8 @@ model.makeMoveString = (piece, cell, positions, face, lastCell) => {
 	const cellName = cell.id == lastCell?.id ? "同" : cell.name;
 	const otherCells = model.pieces.map(p => {
 		if(p.entity.id == piece.entity.id && positions[p.id].player == positions[piece.id].player
-			&& p.id != piece.id && ! positions[p.id].isOut && ! positions[p.id].isExcluded
+			&& p.id != piece.id && positions[p.id].face == positions[piece.id].face
+			&& ! positions[p.id].isOut && ! positions[p.id].isExcluded
 			&& model.checkCanMove(p, cell, positions)){
 			return positions[p.id].cell;
 		}
