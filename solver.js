@@ -49,7 +49,7 @@ TODO
 */
 
 solver.minDepth = 3;
-solver.maxDepth = 10;
+solver.maxDepth = 6;
 solver.illnessLimit = 1800;
 solver.illnessCost = 300;
 solver.counterLimit = 2000000; // 超えるとillnessの増加量が2倍になる
@@ -71,8 +71,7 @@ solver.evaluateFromStack = () => {
 				solver.stack.pop();
 				// min, max ではなく直接 parent?.value や parent?.parent?.value を参照するでも良いかも
 			}
-			else if(solver.stack.length < solver.minDepth ||
-				solver.stack.length < solver.maxDepth && illness < solver.illnessLimit){
+			else if(solver.stack.length < solver.maxDepth){
 				// 下に余裕がある（候補手を作成する）
 				if(globalThis.DEBUG){
 					console.log(solver.current.makePositionString());
@@ -90,7 +89,11 @@ solver.evaluateFromStack = () => {
 						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
 					solver.log("有力手 : " + (nextMoves.filter(m => m.likeliness > 0).map(m => m.name).join(", ") || "なし"));
 				}
-				item.queue = new Util.Queue(nextMoves);
+
+				// 手数によって絞り込みをする
+				if(solver.stack.length < solver.minDepth) item.queue = new Util.Queue(nextMoves);
+				else if(illness < solver.illnessLimit) item.queue = new Util.Queue(nextMoves.filter(move => move.likeliness >= 0));
+				else item.queue = new Util.Queue([nextMoves[0]]);
 				continue;
 			}
 			else{ // 下に進めない（静的評価をする）
@@ -170,11 +173,9 @@ solver.evaluateFromStack = () => {
 solver.calcDomination = (board) => {
 	const counts = [[], []];
 	const minWorths = [[], []];
-	const maxWorths = [[], []];
 	for(let turn of [0, 1]) for(let cell of model.cells){
 		counts[turn].push(0);
 		minWorths[turn].push(9999);
-		maxWorths[turn].push(0);
 	}
 	for(let piece of model.pieces){
 		if(board.positions[piece.id].isExcluded) continue;
@@ -185,20 +186,19 @@ solver.calcDomination = (board) => {
 		for(let line of lines){
 			for(let cell of line){
 				counts[turn][cell.id] += 1;
-				if(worth > maxWorths[turn][cell.id]) maxWorths[turn][cell.id] = worth;
 				if(worth < minWorths[turn][cell.id]) minWorths[turn][cell.id] = worth;
 				if(board.occupiers[cell.id]) break;
 			}
 		}
 	}
-	return [counts, minWorths, maxWorths];
+	return [counts, minWorths];
 }
 solver.calcLikeliness = (board, moves) => {
 	// moves の要素である move に likeliness を書き込む
 	const lastMove = board.history.at(-1);
 	const lastMove2 = board.history.at(-2);
 	const lastCell = lastMove?.main?.newPosition?.cell;
-	const [counts, minWorths, maxWorths] = solver.calcDomination(board);
+	const [counts, minWorths] = solver.calcDomination(board);
 	for(let move of moves){
 		let l = 0;
 		const worth = solver.worthiness[move.main.piece.entity.id][move.main.newPosition.face];
