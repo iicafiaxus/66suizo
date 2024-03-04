@@ -102,6 +102,7 @@ const Game = function(props){
 				]
 			});
 			setStatus(message);
+			addLogLine((history.length + 1) + ". " + "　終　局");
 		}
 	};
 
@@ -116,6 +117,7 @@ const Game = function(props){
 			]
 		});
 		setStatus(message);
+		addLogLine((history.length + 1) + ". " + ["☗", "☖"][turn] + "投　了");
 	}
 
 	const moveManually = (piece, cell) => {
