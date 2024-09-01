@@ -42,6 +42,11 @@ const Game = function(props){
 		const line = React.isValidElement(lineContent) ? lineContent : <p>{lineContent}</p>;
 		setLogLines(lines => [...lines, line]);
 	}
+	const [suspendedLogLines, setSuspendedLogLines] = React.useState([]);
+	const suspendLogLine = (lineContent) => {
+		const line = React.isValidElement(lineContent) ? lineContent : <p>{lineContent}</p>;
+		setSuspendedLogLines(lines => [...lines, line]);
+	}
 
 	const [isInitial, setIsInitial] = React.useState(true);
 	const init = () => {
@@ -185,7 +190,7 @@ const Game = function(props){
 		].join(" "));
 	}
 	const handleAiLog = (message) => {
-		addLogLine(<p className="detail">{message}</p>);
+		suspendLogLine(<p className="detail">{message}</p>);
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);
@@ -203,6 +208,8 @@ const Game = function(props){
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
+		for(let line of suspendedLogLines) addLogLine(line);
+		setSuspendedLogLines([]);
 		addLogLine(<BoardDetailLog positions={positions} lastMove={history.at(-1)} />);
 		addLogLine(<hr />);
 		checkWinner();
