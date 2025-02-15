@@ -208,10 +208,12 @@ const Game = function(props){
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
 		setIsAfterMove(false);
-		for(let line of suspendedLogLines) addLogLine(line);
-		setSuspendedLogLines([]);
-		addLogLine(<BoardDetailLog positions={positions} lastMove={history.at(-1)} />);
+		addLogLine(<div className="log-item">
+			<BoardDetailLog positions={positions} lastMove={history.at(-1)} />
+			<BoardSide lines={suspendedLogLines} />
+		</div>);
 		addLogLine(<hr />);
+		setSuspendedLogLines([]);
 		checkWinner();
 		if( ! isRunning) return;
 		if(model.useAi[turn]) setIsCallingAi(true);
@@ -315,5 +317,12 @@ const BoardDetailLog = function(props){
 			</tr>)}
 		</tbody></table>
 		<div className="komadai player0">{komadai[0]}</div>
+	</div>
+}
+
+const BoardSide = function(props){
+	const lines = props.lines ?? []
+	return <div className="board-side">
+		{lines}
 	</div>
 }

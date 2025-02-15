@@ -19,7 +19,7 @@ body {
 }
 .game {
 	width: 1060px; margin: auto;
-background: url('images/seamless-wood-background-1-modified.jpg') #eda;
+	background: url('images/seamless-wood-background-1-modified.jpg') #eda;
 	background-repeat: no-repeat;
 	background-size: cover;
 	padding: 20px 0; 
@@ -28,7 +28,7 @@ background: url('images/seamless-wood-background-1-modified.jpg') #eda;
 }
 .boardset{
 	display: flex; flex-direction: column;
-padding: 0 20px;
+	padding: 0 20px;
 }
 .wide .game {
 	width: 1628px;
@@ -290,6 +290,16 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .modal-main .message-log{
 	font-size: 80%;
 }
+.modal-main .message-log .log-item{
+	display: flex;
+	flex-wrap: wrap;
+}
+.modal-main .message-log .board-side{
+	justify-self: flex-end;
+	width: 15em;
+	flex-grow: 1;
+	max-width: calc(100% - 2em);
+}
 .modal-main .message-log p{
 	margin: 0;
 	text-align: justify;
@@ -299,9 +309,9 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	border: 1px solid #999;
 	margin: 4px;
 	padding: 4px;
-	float: right;
-	width: calc(100% - ((1em + 32px) + (1em * 6 + 4px * 6 + 1px * 7) + (1em + 32px)) - 8px - 8px - 2px - 32px - 32px);
-	clear: right;
+}
+.modal-main .message-log hr{
+	clear: both;
 }
 .modal-main .buttons{
 	display: flex;
@@ -357,7 +367,4 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .board-detail .komadai.player1{
 	transform: rotate(180deg);
-}
-.board-detail + hr{
-	clear: right;
 }
