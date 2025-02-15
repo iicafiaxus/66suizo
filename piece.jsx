@@ -1,4 +1,5 @@
 const Piece = function(props){
+	const name = props.piece.entity.names[props.position.face];
 	return <div
 		className={[
 			"piece",
@@ -10,6 +11,8 @@ const Piece = function(props){
 		].join(" ")}
 		onClick={(ev) => (props.onClick(ev, props.piece))}
 	>
-		{props.piece.entity.names[props.position.face]}
+		<div class="piece-image">
+			<img src={`images/${name}.png`} />
+		</div>
 	</div>
 }

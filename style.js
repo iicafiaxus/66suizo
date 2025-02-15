@@ -2,10 +2,10 @@ void function(){
 	const onResize = function(ev){
 		const width = document.documentElement.clientWidth;
 		const height = document.documentElement.clientHeight;
-		const magnitudeNormal = Math.min(width / 980, height / 1966);
-		const magnitudeWide = Math.min(width / 1548, height / (1106 + 190));
+		const magnitudeNormal = Math.min(width / 1060, height / 2006);
+		const magnitudeWide = Math.min(width / 1628, height / (1146 + 190));
 		const magnitude = Math.max(magnitudeNormal, magnitudeWide);
-		const widthOriginal = (magnitude == magnitudeNormal) ? 980 : 1548;
+		const widthOriginal = (magnitude == magnitudeNormal) ? 1060 : 1628;
 		const widthOffset = (width / magnitude - widthOriginal) / 2;
 		document.body.classList[(magnitude == magnitudeWide) ? "add" : "remove"]("wide");
 

@@ -18,16 +18,20 @@ body {
 	width: min(980px, 100%); height: 100%; 
 }
 .game {
-	width: 980px; margin: auto; background: #fff;
+	width: 1060px; margin: auto;
+background: url('images/seamless-wood-background-1-modified.jpg') #eda;
+	background-repeat: no-repeat;
+	background-size: cover;
 	padding: 20px 0; 
 	transform-origin: top center;
 	display: flex; flex-direction: column;
 }
 .boardset{
 	display: flex; flex-direction: column;
+padding: 0 20px;
 }
 .wide .game {
-	width: 1548px;
+	width: 1628px;
 }
 .wide .boardset{
 	flex-direction: row;
@@ -57,10 +61,14 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	display: grid; width: 900px; height: 1050px;
 	border: 3px solid;
 	margin: 8px auto; 
-	background: linear-gradient(
-		150deg, #eedf, #ffff 30%, #eedf 60%, #eeef
-	);
+	background: url('images/aluminium-brushed-metal-texture.jpg');
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
 	user-select: none;
+}
+.board:not(.komadai){
+	padding: 20px;
 }
 
 .board.komadai{
@@ -133,7 +141,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 
 
 .cell {
-	border: 1px solid #340;
+	border: 1px solid #003;
 	margin: 0px;
 	display: flex;
 	justify-content: center;
@@ -147,7 +155,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 		outline: 2px dashed #600d;
 	}
 	.cell.last-move-cell{
-		outline: 2px dashed #999d;
+		outline: 2px dashed #339d;
 	}
 	.cell.accepting:hover, .cell.last-move-cell{
 		outline-offset: -8px;
@@ -161,7 +169,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 		outline: 2px dashed #600d;
 	}
 	.cell.last-move-cell{
-		outline: 2px dashed #999d;
+		outline: 2px dashed #339d;
 	}
 	.cell.accepting, .cell.last-move-cell{
 		outline-offset: -8px;
@@ -189,6 +197,17 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .piece.pickable {
 	cursor: pointer;
+}
+
+.piece .piece-image {
+	width: 60px;
+	position: relative;
+}
+.piece img {
+	width: 120px; height: 140px;
+	left: -30px; top: -18px;
+	position: absolute;
+	border-radius: 60px;
 }
 
 .piece.face0{
@@ -219,7 +238,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 .piece.player0{
 	box-shadow: #3aef -1px -2px 3px 0px inset;
 	background: radial-gradient(
-		circle at 40% 20%, #9eff,#6dff 70%, #3aef
+		circle at 40% 20%, #9eff 20%,#6df6 60%, #6df9 62%, #3ae6
 	);
 	text-shadow: -1px -2px 2px #fff9;
 }
@@ -227,7 +246,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 	transform: rotate(180deg);
 	box-shadow: #ec6f 1px 2px 3px 0px inset;
 	background: radial-gradient(
-		circle at 60% 80%, #ff9f, #fe6f 70%,  #ec6f
+		circle at 60% 80%, #ff9f 20%, #fe66 60%, #fe69 62%,  #ec66
 	);
 	text-shadow: 1px 2px 2px #fff9;
 }
