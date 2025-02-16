@@ -11,7 +11,7 @@ const Piece = function(props){
 		].join(" ")}
 		onClick={(ev) => (props.onClick(ev, props.piece))}
 	>
-		<div class="piece-image">
+		<div className="piece-image">
 			<img src={`images/${name}.png`} />
 		</div>
 	</div>
