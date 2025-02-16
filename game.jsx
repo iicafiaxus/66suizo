@@ -69,6 +69,10 @@ const Game = function(props){
 		if(isInitial) init();
 	}, [isInitial]);
 
+	React.useEffect(() => {
+		if (alert) alertSound.play();
+	}, [alert]);
+
 	const openMenu = () => {
 		if(isInitial) setAlert({
 			message: "先後を決めましょう。",
@@ -127,7 +131,10 @@ const Game = function(props){
 	}
 
 	const moveManually = (piece, cell) => {
-		if( ! model.checkCanMove(piece, cell, positions)) return;
+		if( ! model.checkCanMove(piece, cell, positions)){
+			errorSound.play();
+			return;
+		}
 		const promo = model.checkPromotion(piece, cell, positions);
 			// returns [a, b]; a: can keep raw, b: can promote
 		const newPosition = { ...positions[piece.id], cell, face: promo[1] ? 1 : 0,
@@ -234,8 +241,6 @@ const Game = function(props){
 		if(logBodyRef.current) logBodyRef.current.scrollTo({top: logBodyRef.current.scrollHeight});
 	}, [showsLog]);
 
-	const moveSound = new Sound("sound/place-glass-object-81857-modified.mp3");
-
 	return (
 		<React.Fragment>
 			<div className={"game" + (isRunning ? " running" : "")}>
@@ -257,7 +262,7 @@ const Game = function(props){
 					openMenu={openMenu}
 				/>
 			</div>
-			{alert && <Modal onClose={() => setAlert(null)}>
+			{alert && <Modal onDismiss={() => setAlert(null) + errorSound.play()}>
 				{alert.title && <div className="modal-title">{alert.title}</div>}
 				<div className="modal-body">
 					{alert.message && <div className="alert-message">{alert.message}</div>}
@@ -272,7 +277,7 @@ const Game = function(props){
 					</div>}
 				</div>
 			</Modal>}
-			{showsLog && <Modal onClose={() => setShowsLog(false)}>
+			{showsLog && <Modal onDismiss={() => setShowsLog(false) + errorSound.play()}>
 				<div className="modal-title">履歴詳細</div>
 				<div className="modal-body" ref={logBodyRef}>
 					{logLines.length ?

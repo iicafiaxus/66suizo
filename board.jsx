@@ -2,6 +2,7 @@
 "REQUIRE piece.jsx";
 "REQUIRE modal.jsx";
 "REQUIRE systemarea.jsx";
+"REQUIRE sound.jsx";
 
 const Board = function(props){
 	const [floating, setFloating] = React.useState(null);
@@ -9,6 +10,7 @@ const Board = function(props){
 	const handlePieceClick = (event, piece) => {
 		if(floating) return;
 		if( ! props.checkIsPickable(piece)) return;
+		pickUpSound.play();
 		setFloating(piece);
 		event.stopPropagation();
 	}
@@ -22,6 +24,7 @@ const Board = function(props){
 	}
 	const handleKomadaiClick = (cell) => {
 		if(floating){
+			errorSound.play();
 			setFloating(null);
 		}
 		else props.openMenu();
