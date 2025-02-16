@@ -191,7 +191,7 @@ const Game = function(props){
 		].join(" "));
 	}
 	const handleAiLog = (message) => {
-		suspendLogLine(<p className="detail">{message}</p>);
+		suspendLogLine(<p className="detail" key={message}>{message}</p>);
 	}
 
 	const [times, setTimes] = React.useState([0, 0]);
