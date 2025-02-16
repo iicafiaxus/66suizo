@@ -3,6 +3,7 @@
 "REQUIRE board.jsx";
 "REQUIRE models/model.js";
 "REQUIRE solver.js";
+"REQUIRE sound.jsx";
 
 const Game = function(props){
 	const xSize = model.xSize, ySize = model.ySize;
@@ -207,6 +208,7 @@ const Game = function(props){
 	const [isAfterMove, setIsAfterMove] = React.useState(false);
 	React.useEffect(() => {
 		if( ! isAfterMove) return;
+		moveSound.play();
 		setIsAfterMove(false);
 		addLogLine(<div className="log-item">
 			<BoardDetailLog positions={positions} lastMove={history.at(-1)} />
@@ -232,6 +234,7 @@ const Game = function(props){
 		if(logBodyRef.current) logBodyRef.current.scrollTo({top: logBodyRef.current.scrollHeight});
 	}, [showsLog]);
 
+	const moveSound = new Sound("sound/place-glass-object-81857-modified.mp3");
 
 	return (
 		<React.Fragment>
