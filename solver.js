@@ -85,9 +85,9 @@ solver.evaluateFromStack = () => {
 				for(let m of nextMoves) m.illness = maxLikeliness - m.likeliness;
 				if(solver.stack.length == 1){
 					for(let m of nextMoves) m.name = solver.current.makeMoveLineString([m], solver.current.history.at(-1)?.main.newPosition.cell);
-					console.log("候補手 : " + nextMoves.map(m =>
+					console.log("合法手 : " + nextMoves.map(m =>
 						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
-					solver.log("有力手 : " + (nextMoves.filter(m => m.likeliness > 0).map(m => m.name).join(", ") || "なし"));
+					solver.log("候補手 : " + (nextMoves.filter(m => m.likeliness > 0).map(m => m.name).join(", ") || "なし"));
 				}
 
 				// 手数によって絞り込みをする
