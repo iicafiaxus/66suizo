@@ -84,6 +84,7 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .systemarea{
 	width: 100%; 
+	position: relative;
 	display: flex; flex-direction: row; justify-content: space-between;
 }
 .systemarea .timers{
@@ -92,12 +93,16 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .systemarea .status{
 	font-size: 36px;
-	padding: 0 16px;
-	margin: 8px;
-	height: min-content;
-	align-self: center;
+	padding: 16px;
+	margin: 8px 32px;
+	align-self: stretch;
 	max-height: 166px;
 	overflow-y: auto;
+background: url('images/free-grunge-texture-of-old-vintage-paper-background-image-modified.jpg') #b93;
+	background-position: center;
+	color: #330;
+	box-shadow: #664 0 0 5px 0;
+	width: 100%;
 }
 
 
@@ -134,8 +139,8 @@ h1 { text-align: center; letter-spacing: 0.1em; }
 }
 .systemarea .system-buttons{
 	position: absolute;
-	left: 24px;
-	top: 24px;
+	right: 24px;
+	bottom: -24px;
 }
 
 
