@@ -3,8 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&display=swap');
 * {
-	font-family: "Klee One", sans-serif;
-	letter-spacing: -0.1em;
+	font-family: "BIZ UDPMIncho", sans-serif;
 	font-size: 24px; 
 	-webkit-tap-highlight-color: #0000;
 }
