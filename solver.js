@@ -87,7 +87,7 @@ solver.evaluateFromStack = () => {
 					for(let m of nextMoves) m.name = solver.current.makeMoveLineString([m], solver.current.history.at(-1)?.main.newPosition.cell);
 					console.log("合法手 : " + nextMoves.map(m =>
 						m.name + (m.likeliness ? "[" + m.likeliness + "]" : "")).join(", "));
-					solver.log("候補手 : " + (nextMoves.filter(m => m.likeliness > 0).map(m => m.name).join(", ") || "なし"));
+					console.log("候補手 : " + (nextMoves.filter(m => m.likeliness > 0).map(m => m.name).join(", ") || "なし"));
 				}
 
 				// 手数によって絞り込みをする
