@@ -245,8 +245,8 @@ const Game = function(props){
 		<React.Fragment>
 			<div className={"game" + (isRunning ? " running" : "")}>
 				<SystemArea turn={turn} times={times} status={status} buttons={[
-					<button onClick={() => setShowsLog(true)}>履歴詳細...</button>
-				]} />
+					<button onClick={() => setShowsLog(true)}>履歴詳細...</button>,
+				]} isRunning={isRunning} />
 				<Board
 					xSize={xSize} ySize={ySize}
 					cells={cells}
