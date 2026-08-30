@@ -15,9 +15,23 @@ void function(){
 			document.head.appendChild(style);
 		}
 		document.getElementById("style-all-magnitude").innerHTML = [
-			`.game { `,
+			`.game {`,
 			`	transform: scale(${magnitude}) translate(${widthOffset}px, 0%);`,
 			`	transform-origin: 0% 0%;`,
+			`}`,
+			`.modal-main {`,
+			`	transform: scale(${magnitude}) translate(-${50 / magnitude}%, -${40 / magnitude}%);`,
+			`	max-height: calc(90vh / ${magnitude});`,
+			`}`,
+			`@keyframes modal-jump-in {`,
+			`	from {`,
+			`		left: 50%; top:-20%;`,
+			`		transform: scale(${magnitude}) translate(-${50 / magnitude}%, -${-20 / magnitude}%);`,
+			`	}`,
+			`	to {`,
+			`		left: 50%; top: 40%;`,
+			`		transform: scale(${magnitude}) translate(-${50 / magnitude}%, -${40 / magnitude}%);`,
+			`	}`,
 			`}`
 		].join("\n");
 	};

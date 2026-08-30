@@ -267,11 +267,18 @@ background: url('images/free-grunge-texture-of-old-vintage-paper-background-imag
 	);
 	border-radius: 8px; border: 2px solid #000f;
 	box-shadow: #0008 0px 0px 20px 0px; 
-	max-width: 90vw; max-height: 90vh;
-	min-width: 50vw; min-height: min(30vw, 50vh);
+	width: fit-content;
 	left: 50%; top: 40%; transform: translate(-50%, -40%);
 	animation: 0.2s ease-in modal-jump-in;
 	display: flex; flex-direction: column;
+}
+body.wide .modal-main {
+	max-width: 1200px;
+	min-height: 200px;
+}
+body:not(.wide) .modal-main {
+	max-width: 900px;
+	min-height: 200px;
 }
 .modal-title{
 	background: #f99;
@@ -285,12 +292,12 @@ background: url('images/free-grunge-texture-of-old-vintage-paper-background-imag
 }
 
 @keyframes modal-jump-in {
-	from { left: 50%; top:-20%; transform: translate(-50%, -20%); }
+	from { left: 50%; top:-20%; transform: translate(-50%, 20%); }
 	to { left: 50%; top: 40%; transform: translate(-50%, -40%); }
 }
 
 .modal-main *{
-	font-size: min(4vw, 30px);
+	font-size: 30px;
 }
 .modal-main .alert-message{
 	margin: 8px 0 0.3em;
@@ -332,7 +339,7 @@ background: url('images/free-grunge-texture-of-old-vintage-paper-background-imag
 	min-height: 2.25em;
 	height: fit-content;
 	align-self: center;
-	font-size: min(4.8vw, 36px); 
+	font-size: 36px;
 	margin: 0.5em 0.25em;
 	padding: 0 calc(4px + 0.5em);
 	cursor: pointer;
