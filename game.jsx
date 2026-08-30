@@ -77,7 +77,7 @@ const Game = function(props){
 		if(isInitial) setAlert({
 			message: ["あなたが先手です。", "AIが先手です。"][turn],
 			options: [
-				{ caption: "対局開始", onClick: () => start(turn) },
+				{ caption: "対局開始", onClick: () => setTurn(turn) + start(turn) },
 				{ caption: "待った", onClick: () => setTurn(1 - turn) },
 			]
 		});
