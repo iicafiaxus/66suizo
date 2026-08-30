@@ -179,7 +179,7 @@ const Game = function(props){
 
 	const handleAiMove = (move) => { // m: move object (new)
 		if(isRunning && move){
-			setStatus("指しました。あなたの手番です。");
+			setStatus(`指しました（${move.name}）。あなたの手番です。`);
 			perform(move);
 		}
 		else{
@@ -191,7 +191,7 @@ const Game = function(props){
 		if( ! param) return;
 		if(param.message) setStatus(param.message);
 		else setStatus([
-			//"考えています",
+			"考えています...",
 			//(param.counter ?? "0") + "手",
 			param.move ? "(" + param.move?.name + " を検討中)..." : "",
 			param.bestMove ? "候補手 : " + param.bestMove?.name + " (" + param.value + ")" : "",
