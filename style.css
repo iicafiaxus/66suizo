@@ -297,10 +297,10 @@ body:not(.wide) .modal-main {
 }
 
 .modal-main *{
-	font-size: 30px;
+	font-size: 36px;
 }
 .modal-main .alert-message{
-	margin: 8px 0 0.3em;
+	margin: 1.5em auto;
 }
 .modal-main .message-log{
 	font-size: 80%;
