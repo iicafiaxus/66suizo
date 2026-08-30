@@ -52,7 +52,7 @@ const Game = function(props){
 	const [isInitial, setIsInitial] = React.useState(true);
 	const init = () => {
 		for(let p of pieces) setPositions[p.id](p.position);
-		setTurn(model.turn);
+		setTurn(Math.random() > 0.5 ? 0 : 1);
 		setLastMove(null);
 		setHistory([]);
 		setLogLines([]);
@@ -75,11 +75,10 @@ const Game = function(props){
 
 	const openMenu = () => {
 		if(isInitial) setAlert({
-			message: "先後を決めましょう。",
+			message: ["あなたが先手です。", "AIが先手です。"][turn],
 			options: [
-				{ caption: "ＡＩが先手", onClick: () => setTurn(1) + start(1) },
-				{ caption: "あなたが先手", onClick: () => setTurn(0) + start(0) },
-				{ caption: "ランダム", onClick: () => setTurn(Math.floor(Math.random() * 2)) + start() },
+				{ caption: "対局開始", onClick: () => start(turn) },
+				{ caption: "待った", onClick: () => setTurn(1 - turn) },
 			]
 		});
 		else if( ! isRunning) setAlert({
