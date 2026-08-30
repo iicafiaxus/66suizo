@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@600');
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic&display=swap');
 * {
-	font-family: "BIZ UDPMIncho", sans-serif;
+	font-family: "BIZ UDPGothic", sans-serif;
 	font-size: 24px; 
 	-webkit-tap-highlight-color: #0000;
 }
@@ -194,9 +194,7 @@ background: url('images/free-grunge-texture-of-old-vintage-paper-background-imag
 	letter-spacing: -2px; 
 	border-radius: 60px;
 	writing-mode: vertical-lr;
-	font-family: "Zen Kaku Gothic New"; font-weight: 700;
-	font-size: 48px; 
-	text-align: center;
+		text-align: center;
 	user-select: none;
 }
 .piece.pickable {
