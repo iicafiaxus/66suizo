@@ -151,10 +151,18 @@ const Game = function(props){
 			name: model.makeMoveString(piece, cell, positions, newPosition.face, history.at(-1)?.main.newPosition.cell)
 		};
 		if(promo[0] && promo[1]){
+			nonpromotingMove = {
+				main: { piece, newPosition: {...newPosition, face: 0}, oldPosition: positions[piece.id] },
+				captured: captured ? {
+					piece: captured, newPosition: capturedPosition, oldPosition: positions[captured.id]
+				} : null,
+				likeliness: 0,
+				name: model.makeMoveString(piece, cell, positions, 0, history.at(-1)?.main.newPosition.cell)
+			};
 			setAlert({
 				options: [
 					{ caption: "成る", onClick: () => perform(move), isPrimary: true },
-					{ caption: "成らない", onClick: () => { move.main.newPosition.face = 0, perform(move) } },
+					{ caption: "成らない", onClick: () => perform(nonpromotingMove) },
 				]				
 			});
 		}
