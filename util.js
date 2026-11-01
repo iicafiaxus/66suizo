@@ -28,7 +28,7 @@ Util.Queue.prototype.getLength = function(){
 	return this.array.length - this.index;
 }
 Util.Queue.prototype.getHasItem = function(){
-	return this.array.length > this.lndex;
+	return this.array.length > this.index;
 }
 Util.Queue.prototype.flush = function(){
 	this.index = this.array.length;
